@@ -1,0 +1,19 @@
+{
+  "name": "printable",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babelify": "^7.2.0",
+    "lodash": "^3.10.1",
+    "vue": "^1.0.7",
+    "vue-hot-reload-api": "^1.2.1",
+    "vueify": "^5.0.4",
+    "vueify-insert-css": "^1.0.0"
+  }
+}
