@@ -8,9 +8,9 @@
 
   <!-- template for the shape component. -->
   <script type="text/x-template" id="shape-template">
-    <rect v-if="shape.name=='rect'" v-bind:data-id="shape.id" v-bind:x="shape.x" v-bind:y="shape.y" v-bind:width="shape.width" v-bind:height="shape.height" v-bind:fill= "shape.selected? 'rgb(70,180,200)' : '#333333'" stroke="#333333" stroke-width="1px" v-on:click="clicked($event, shape)" />
-    <circle v-if="shape.name=='circle'" v-bind:data-id="shape.id" v-bind:cx="shape.cx" v-bind:cy="shape.cy" v-bind:r="shape.r" v-bind:fill="shape.selected? 'rgb(70,180,200)' : '#333333'" stroke="#333333" stroke-width="1px" />
-    <line v-if="shape.name=='line'" v-bind:data-id="shape.id" v-bind:x1="shape.x1" v-bind:y1="shape.y1" v-bind:x2="shape.x2" v-bind:y2="shape.y2" v-bind:stroke="shape.selected? 'rgb(70,180,200)' : '#333333'" stroke-width="4"/>
+    <rect v-if="shape.name=='rect' && !shape.removed" v-bind:data-id="shape.id" v-bind:x="shape.x" v-bind:y="shape.y" v-bind:width="shape.width" v-bind:height="shape.height" v-bind:fill= "shape.selected? 'rgb(70,180,200)' : '#333333'" stroke="#333333" stroke-width="1px" v-on:click="clicked($event, shape)" />
+    <circle v-if="shape.name=='circle' && !shape.removed" v-bind:data-id="shape.id" v-bind:cx="shape.cx" v-bind:cy="shape.cy" v-bind:r="shape.r" v-bind:fill="shape.selected? 'rgb(70,180,200)' : '#333333'" stroke="#333333" stroke-width="1px" />
+    <line v-if="shape.name=='line' && !shape.removed" v-bind:data-id="shape.id" v-bind:x1="shape.x1" v-bind:y1="shape.y1" v-bind:x2="shape.x2" v-bind:y2="shape.y2" v-bind:stroke="shape.selected? 'rgb(70,180,200)' : '#333333'" stroke-width="4"/>
   </script>
 
   <div class="canvas-wrap">
@@ -105,6 +105,10 @@
     <div class="tool-button" tool="zoom" v-on:click="onTool('zoom')">
       <div class="tool-info">tool: {{tool}}
         <div class="shortcut">Z</div>
+      </div>
+    </div>
+    <div class="tool-button" tool="delete" v-on:click="onTool('delete')">
+      <div class="tool-info">Delete
       </div>
     </div>
     <div class="tool-button" tool="pan" v-on:click="onTool('pan')">

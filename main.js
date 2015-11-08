@@ -41,7 +41,7 @@ var board = new Vue({
   el: '#board',
   debug: true,
   data: {
-    name: 'hello',
+    name: 'printable',
     tool: 'select',
     fileFieldListened: false,
     obj: {},
@@ -69,7 +69,8 @@ var board = new Vue({
           cx: 75,
           cy: 75,
           r: 75,
-          selected: false
+          selected: false,
+          removed: false
         },
         {
           id: '1',
@@ -78,7 +79,8 @@ var board = new Vue({
           y: 20,
           width: 200,
           height: 100,
-          selected: false
+          selected: false,
+          removed: false
         },
         {
           id: '2',
@@ -87,7 +89,8 @@ var board = new Vue({
           y1: 20,
           x2: 100,
           y2: 200,
-          selected: false
+          selected: false,
+          removed: false
         },
         ]
       }
@@ -108,6 +111,11 @@ var board = new Vue({
   },
   methods: {
     onTool: function(tool) {
+
+      if (tool == 'delete') {
+        this.obj.removed = true
+        return
+      }
 
       if (tool == 'zoom') {
         this.viewBoxWidth += 20
@@ -252,7 +260,8 @@ var board = new Vue({
           y: this.offsetY,
           width: 1,
           height: 1,
-          selected: true
+          selected: true,
+          removed: false
         };
         this.obj = shape;
         this.shapes.push(shape);
@@ -267,7 +276,8 @@ var board = new Vue({
           cx: this.offsetX,
           cy: this.offsetY,
           r: 1,
-          selected: true
+          selected: true,
+          removed: false
         };
         this.obj = shape;
         this.shapes.push(shape);
@@ -283,7 +293,8 @@ var board = new Vue({
           y1: this.offsetY,
           x2: this.offsetX,
           y2: this.offsetY,
-          selected: true
+          selected: true,
+          removed: false
         };
         this.obj = shape;
         this.shapes.push(shape);
