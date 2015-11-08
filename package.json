@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch-scss": "scss --watch printable.scss",
+    "build": "browserify -t babelify main.js > build.js",
+    "watch": "watchify -t babelify main.js -o build.js"
   },
   "author": "",
   "license": "ISC",
