@@ -107,6 +107,30 @@
         <div class="shortcut">Z</div>
       </div>
     </div>
+    <div class="tool-button" tool="pan" v-on:click="onTool('pan')">
+      <div class="tool-info">Pan
+      </div>
+    </div>
+    <div class="tool-button" tool="dump" v-on:click="onTool('dumpSVG')">
+      <div class="tool-info">Dump SVG
+      </div>
+    </div>
+    <div class="tool-button" tool="dump" v-on:click="onTool('dumpPNG')">
+      <div class="tool-info">Dump PNG
+      </div>
+    </div>
+    <div class="tool-button" tool="dump" v-on:click="onTool('dumpCSV')">
+      <div class="tool-info">Dump CSV
+      </div>
+    </div>
+    <div class="tool-button" tool="dump" v-on:click="onTool('dumpJSON')">
+      <div class="tool-info">Dump JSON
+      </div>
+    </div>
+    <div class="tool-button" tool="dump" v-on:click="onTool('loadJSON')">
+      <div class="tool-info">Load JSON
+      </div>
+    </div>
   </div>
 
 
@@ -221,7 +245,7 @@
     </div>
   </div>
 
-
+<input type="file" name="fileField" id="fileField" class="hide">
 
   <script src="build.js"></script>
 </body>

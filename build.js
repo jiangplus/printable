@@ -2,12 +2,48 @@
 var Vue = require('vue');
 var _ = require('lodash');
 
+function convert(svg, cb) {
+  var canvas = document.createElement('canvas');
+  var ctx = canvas.getContext('2d');
+  var image = new Image();
+
+  image.onload = function load() {
+    canvas.height = image.height;
+    canvas.width = image.width;
+    ctx.drawImage(image, 0, 0);
+    cb(canvas);
+  };
+
+  image.src = 'data:image/svg+xml;base64,' + btoa(new XMLSerializer().serializeToString(svg));
+};
+
+function downloadFile(fileName, content) {
+  var aLink = document.createElement('a');
+  var blob = new Blob([content]);
+  var evt = document.createEvent("HTMLEvents");
+  evt.initEvent("click", false, false);
+  aLink.download = fileName;
+  aLink.href = URL.createObjectURL(blob);
+  aLink.dispatchEvent(evt);
+}
+
+var saveFile = function (data, filename) {
+  var save_link = document.createElementNS('http://www.w3.org/1999/xhtml', 'a');
+  save_link.href = data;
+  save_link.download = filename;
+
+  var event = document.createEvent('MouseEvents');
+  event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+  save_link.dispatchEvent(event);
+};
+
 var board = new Vue({
   el: '#board',
   debug: true,
   data: {
     name: 'hello',
     tool: 'select',
+    fileFieldListened: false,
     obj: {},
     dragging: false,
     deltaX: 0,
@@ -65,12 +101,87 @@ var board = new Vue({
   },
   methods: {
     onTool: function (tool) {
-      this.tool = tool;
 
       if (tool == 'zoom') {
         this.viewBoxWidth += 20;
         this.viewBoxHeight += 20;
+        return;
       }
+
+      if (tool == 'dumpSVG') {
+        var content = document.querySelector('svg.canvas').outerHTML;
+        content = content.replace('svg', "svg xmlns='http://www.w3.org/2000/svg'");
+        downloadFile('dump.svg', content);
+        return;
+      }
+
+      if (tool == 'dumpJSON') {
+        var content = JSON.stringify(this.layers);
+        downloadFile('dump.json', content);
+        return;
+      }
+
+      if (tool == 'loadJSON') {
+        var self = this;
+        var fileField = document.getElementById('fileField');
+        if (!this.fileFieldListened) {
+          fileField.addEventListener('change', function (x) {
+            console.log(x.target.files);
+            if (x.target.files.length > 0) {
+              var file = x.target.files[0];
+              window.target = file;
+              var fileReader = new FileReader();
+              fileReader.onload = function (evt) {
+                console.log(this.result);
+                self.layers = JSON.parse(this.result);
+                self.shapes = self.layers[0].shapes;
+                self.obj = {};
+              };
+              fileReader.readAsText(file);
+            }
+          }, false);
+        }
+        fileField.click();
+        return;
+      }
+
+      if (tool == 'dumpPNG') {
+        var svg = document.querySelector('svg.canvas');
+
+        convert(svg, function thumbnail(canvas) {
+          var imgData = canvas.toDataURL();
+          imgData = imgData.replace('image/png', 'image/octet-stream');
+          var filename = 'file_' + new Date().getTime() + '.' + 'png';
+          saveFile(imgData, filename);
+        });
+        return;
+      }
+
+      if (tool == 'dumpCSV') {
+        var svg = document.querySelector('svg.canvas');
+
+        convert(svg, function thumbnail(canvas) {
+          var ctx = canvas.getContext('2d');
+          var data = ctx.getImageData(0, 0, 600, 600).data;
+
+          var result = [];
+
+          for (var i = 0; i < data.length; i += 4) {
+            var color = data[i] + data[i + 1] + data[i + 2] + data[i + 3];
+            if (i > 0 && i % 600 * 4 == 0) {
+              result.push("\n");
+            }
+            result.push(color > 0 ? 1 : 0);
+          }
+
+          console.log(result.length);
+          console.log(result.join(','));
+          downloadFile('export.csv', result.join(','));
+        });
+        return;
+      }
+
+      this.tool = tool;
     },
     doThat: function (ev) {
       // console.log('board')
@@ -191,6 +302,12 @@ var board = new Vue({
       // console.log(ev)
       if (this.dragging) {
         // console.log('drag')
+
+        if (this.tool == 'pan') {
+          this.viewBoxX -= this.deltaX;
+          this.viewBoxY -= this.deltaY;
+          return;
+        }
 
         if (this.tool == 'circle' && this.obj.id) {
           var shape = this.obj;
