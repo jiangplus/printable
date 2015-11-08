@@ -39,7 +39,7 @@ body {
   display: block; }
 .menu-nav ul.parent-manu > li {
   margin-left: 15px;
-  cursor: url("/assets/images/cursors/cursor.png") 1 1, default !important;
+  cursor: url("assets/images/cursors/cursor.png") 1 1, default !important;
   position: relative;
   display: inline-block; }
 .menu-nav ul.parent-manu > li > span {
@@ -131,47 +131,47 @@ body {
   border-bottom-color: rgba(228, 146, 148, 0.92) !important; }
 
 #tool-palette .tool-button[tool="cursor"] {
-  background-image: url("/assets/images/cursors/cursor.png") !important;
+  background-image: url("assets/images/cursors/cursor.png") !important;
   background-repeat: no-repeat;
   background-position: 14px 10px; }
 #tool-palette .tool-button[tool="pen"] {
-  background-image: url("/assets/images/cursors/type-a.png") !important;
+  background-image: url("assets/images/cursors/type-a.png") !important;
   background-repeat: no-repeat;
   background-position: 13px 8px; }
 #tool-palette .tool-button[tool="crayon"] {
-  background-image: url("/assets/images/cursors/crayon.png") !important;
+  background-image: url("assets/images/cursors/crayon.png") !important;
   background-repeat: no-repeat;
   background-position: 12px 8px; }
 #tool-palette .tool-button[tool="ellipse"] {
-  background-image: url("/assets/images/cursors/ellipse.png") !important;
+  background-image: url("assets/images/cursors/ellipse.png") !important;
   background-repeat: no-repeat;
   background-position: 10px 9px; }
 #tool-palette .tool-button[tool="rectangle"] {
-  background-image: url("/assets/images/cursors/rectangle.png") !important;
+  background-image: url("assets/images/cursors/rectangle.png") !important;
   background-repeat: no-repeat;
   background-position: 10px 9px; }
 #tool-palette .tool-button[tool="line"] {
-  background-image: url("/assets/images/cursors/line.png") !important;
+  background-image: url("assets/images/cursors/line.png") !important;
   background-repeat: no-repeat;
   background-position: 10px 9px; }
 #tool-palette .tool-button[tool="rotate"] {
-  background-image: url("/assets/images/cursors/rotate.png") !important;
+  background-image: url("assets/images/cursors/rotate.png") !important;
   background-repeat: no-repeat;
   background-position: 10px 9px; }
 #tool-palette .tool-button[tool="type"] {
-  background-image: url("/assets/images/cursors/olivetti.png") !important;
+  background-image: url("assets/images/cursors/olivetti.png") !important;
   background-repeat: no-repeat;
   background-position: 8px 9px; }
 #tool-palette .tool-button[tool="eyedropper"] {
-  background-image: url("/assets/images/cursors/eyedropper.png") !important;
+  background-image: url("assets/images/cursors/eyedropper.png") !important;
   background-repeat: no-repeat;
   background-position: 10px 9px; }
 #tool-palette .tool-button[tool="zoom"] {
-  background-image: url("/assets/images/cursors/loupe.png") !important;
+  background-image: url("assets/images/cursors/loupe.png") !important;
   background-repeat: no-repeat;
   background-position: 10px 9px; }
 #tool-palette .tool-button[tool="eyedropper"] {
-  background-image: url("/assets/images/cursors/eyedropper.png") !important;
+  background-image: url("assets/images/cursors/eyedropper.png") !important;
   background-repeat: no-repeat;
   background-position: 10px 9px; }
 
@@ -182,7 +182,7 @@ body {
   border-bottom-width: 1px;
   border-bottom-style: solid;
   border-bottom-color: rgba(220, 220, 220, 0.92);
-  cursor: url("/assets/images/cursors/cursor.png") 1 1, default !important;
+  cursor: url("assets/images/cursors/cursor.png") 1 1, default !important;
   margin-left: 20px;
   margin-bottom: 5px;
   position: relative;
@@ -227,7 +227,7 @@ body {
   margin-bottom: 10px;
   background-color: rgba(234, 234, 234, 0.92);
   border-bottom: 1px solid rgba(220, 220, 220, 0.92);
-  cursor: url("/assets/images/cursors/cursor.png") 1 1, default !important;
+  cursor: url("assets/images/cursors/cursor.png") 1 1, default !important;
   z-index: 6000; }
 
 .utilities .utility-window.stroke-width {
