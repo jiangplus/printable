@@ -6,6 +6,11 @@
 </head>
 <body id="board">
 
+  <!-- template for the layer component. -->
+  <script type="text/x-template" id="layyer-template">
+    <shape v-for="shape in layer.shapes" :shape="shape" />
+  </script>
+
   <!-- template for the shape component. -->
   <script type="text/x-template" id="shape-template">
     <rect v-if="shape.name=='rect' && !shape.removed" v-bind:data-id="shape.id" v-bind:x="shape.x" v-bind:y="shape.y" v-bind:width="shape.width" v-bind:height="shape.height" v-bind:fill= "shape.selected? 'rgb(70,180,200)' : '#333333'" stroke="#333333" stroke-width="1px" v-on:click="clicked($event, shape)" />
@@ -15,52 +20,63 @@
 
   <div class="canvas-wrap">
     <svg class="canvas"  viewbox="{{viewBox}}" v-on:click="doThat" v-on:mousedown="onBoardMouseDown" v-on:mouseup="onBoardMouseUp"  v-on:mousemove="onBoardMouseMove">
-    <shape v-for="shape in shapes" :shape="shape" :clicked="doThis"/>
-  </svg>
+      <layyer v-for="layer in layers" :layer="layer" />
+    </svg>
   </div>
 
   <div class="menu-nav">
-    <ul class="parent-manu">
-      <li>
+    <ul class="parent-menu">
+      <li v-on:click="toggleMenu('file')">
         <span>File</span>
-        <ul>
-          <li class="split">
-            New
-          </li>
-          <li>Save</li>
-          <li class="red">Save as...</li>
+        <ul v-show="topmenu == 'file'">
+          <li v-on:click="onTool('dumpSVG')"> Dump SVG </li>
+          <li v-on:click="onTool('dumpSVG')"> Dump PNG </li>
+          <li v-on:click="onTool('dumpCSV')"> Dump CSV </li>
+          <li v-on:click="onTool('dumpJSON')"> Dump JSON </li>
+          <li v-on:click="onTool('loadJSON')"> Load JSON </li>
         </ul>
       </li>
-      <li>
+      <li v-on:click="toggleMenu('edit')">
         <span>Edit</span>
-        <ul>
-          <li class="split">
-            New
-          </li>
-          <li>Save</li>
-          <li class="red">Save as...</li>
+        <ul v-show="topmenu == 'edit'">
+          <li v-on:click="onTool('select')"> Select </li>
+          <li v-on:click="onTool('delete')"> Delete </li>
         </ul>
       </li>
-      <li>
-        <span v-on:click="newLayer">Layers</span>
-        <ul>
+      <li v-on:click="toggleMenu('layer')">
+        <span>Layers</span>
+        <ul v-show="topmenu == 'layer'">
           <li class="split" v-on:click="newLayer">New</li>
           <li v-on:click="deleteLayer">Delete</li>
         </ul>
       </li>
-      <li><span>Geometry</span></li>
-      <li><span>View</span></li>
-      <li>
+      <li v-on:click="toggleMenu('geometry')">
+        <span>Geometry</span>
+        <ul v-show="topmenu == 'geometry'">
+          <li v-on:click="onTool('rectangle')">Rectangle</li>
+          <li v-on:click="onTool('circle')">Circle</li>
+          <li v-on:click="onTool('line')">Line</li>
+        </ul>
+      </li>
+      <li v-on:click="toggleMenu('view')">
+        <span>View</span>
+        <ul v-show="topmenu == 'view'">
+          <li v-on:click="onTool('zoomin')"> Zoom In </li>
+          <li v-on:click="onTool('zoomout')"> Zoom Out </li>
+          <li v-on:click="onTool('pan')"> Pan </li>
+        </ul>
+      </li>
+      <li class="hide">
         <span>Sign up</span>
-        <div class="form">
+        <div class="form" v-show="topmenu == 'signup'">
           <input type="text" class="white" placeholder="Email" id="login-email-input">
           <input type="password" class="white" placeholder="Password" id="login-passwd-input" h="">
           <button id="submit-login" class="blue">Sign in</button>
         </div>
       </li>
-      <li>
+      <li class="hide">
         <span>Sign in</span>
-        <div class="form">
+        <div class="form" v-show="topmenu == 'signin'">
           <p>
             You can get more out of Mondrian if you make an account.
             Save all your undos, connect to your Dropbox, and more.
@@ -70,9 +86,9 @@
           <button id="submit-login" class="blue">Sign in</button>
         </div>
       </li>
-      <li>
+      <li class="hide">
         <span>Output</span>
-        <div class="form">
+        <div class="form" v-show="topmenu == 'output'">
           <input type="text" class="white" placeholder="Email" id="login-email-input">
           <textarea></textarea>
         </div>
@@ -140,35 +156,6 @@
 
   <div class="utilities">
     <div class="utilities-col ut-col-left">
-<style type="text/css">
-
-.utilities .adjust {
-  width: 200px;
-  height: 160px;
-  margin-left: 40px;
-}
-.utilities .adjust .adjust-val-label {
-  display: inline-block;
-  padding: 5px;
-  padding-left: 20px;
-  width: 30px;
-}
-.utilities .adjust input {
-  width: 120px;
-  margin: 5px;
-  margin-left: 5px;
-  background: white;
-  display: inline-block;
-  padding: 7px;
-  font-size: 12px;
-  margin-left: -1px;
-  font-family: Maven Pro, 'Maven Pro';
-  border: none;
-  border-bottom: 1px solid rgba(220, 220, 220, 0.92);
-  text-align: right;
-}
-
-</style>
 
       <div v-if="obj.name=='rect'" class="utility-window adjust">
         <div class="prop">
@@ -240,7 +227,9 @@
             <div id="archive-thumbs">
 
             <div v-for="layer in layers" v-on:click="selectLayer($event, layer)" class="archive-thumb" position="7">
-              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAABwCAYAAAD8HIl9AAACpklEQVR4Xu3SPWoVYRiG4TegcQM2qewECZZWQspUQjYRQQuDdgpWabRO5SpcQBbgHsQ2haaw0PhXKBZincDhnlOca+qZ5/vm5toajwJBga1g06QCAxYESQGwkqxGwWIgKQBWktUoWAwkBcBKshoFi4GkAFhJVqNgMZAUACvJahQsBpICYCVZjYLFQFIArCSrUbAYSAqAlWQ1ChYDSQGwkqxGwWIgKQBWktUoWAwkBcBKshoFi4GkAFhJVqNgMZAUACvJahQsBpICYCVZjYLFQFIArCSrUbAYSAqAlWQ1ChYDSQGwkqxGwWIgKQBWktUoWAwkBcBKshoFi4GkAFhJVqNgMZAUACvJahQsBpICYCVZjYLFQFIArCSrUbAYSAqAlWQ1ChYDSYGlYG3PzI3kD64++ntmvl/9dW+uUmARWPdfHb3YuXv7wSoXXfXbLx/PP5weHj+emR+rbvn+8gKLwNp/8/Jk597uk8uv073x9ezTu7cHT/dn5lt3iuX/BcBiISkAVpLVKFgMJAXASrIaBYuBpABYSVajYDGQFAAryWoULAaSAmAlWY2CxUBSAKwkq1GwGEgKgJVkNQoWA0kBsJKsRsFiICkAVpLVKFgMJAXASrIaBYuBpABYSVajYDGQFAAryWoULAaSAmAlWY0uAmvv9bPnN+/cOlhn7ovzz+9PHx4/mpmf67zHppy9CKyZuT4z19Yc9c/M/FrzHTbm+KVgbUxQP/qvAFgkJAXASrIaBYuBpABYSVajYDGQFAAryWoULAaSAmAlWY2CxUBSAKwkq1GwGEgKgJVkNQoWA0kBsJKsRsFiICkAVpLVKFgMJAXASrIaBYuBpABYSVajYDGQFAAryWoULAaSAmAlWY2CxUBSAKwkq1GwGEgKgJVkNQoWA0mBvzyMCYBEfJsvAAAAAElFTkSuQmCC" />
+              <svg viewbox="0 0 600 600" :class="layer.active ? 'active' : '' " >
+                <layyer :layer="layer" />
+              </svg>
             </div>
 
             </div>

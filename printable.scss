@@ -34,39 +34,39 @@ body {
 }
 
 .menu-nav {
-  ul.parent-manu {
+  ul.parent-menu {
     list-style: none;
   }
 
-  ul.parent-manu > li > ul, ul.parent-manu > li > .form {
-    display: none;
+  ul.parent-menu > li > ul, ul.parent-menu > li > .form {
+    /*display: none;*/
     /*display: block;*/
   }
 
-  ul.parent-manu > li:hover > ul {
+  ul.parent-menu > li:hover > ul {
     display: block;
   }
 
-  ul.parent-manu > li > ul:hover {
+  ul.parent-menu > li > ul:hover {
     display: block;
   }
 
 
-  ul.parent-manu > li {
+  ul.parent-menu > li {
     margin-left: 15px;
     cursor: url('assets/images/cursors/cursor.png') 1 1, default !important;
     position: relative;
     display: inline-block;
   }
 
-  ul.parent-manu > li > span {
+  ul.parent-menu > li > span {
     width: 100%;
     height: 100%;
     padding: 9px 10px;
     background: rgba(234, 234, 234, 0.92);
   }
 
-  ul.parent-manu > li > ul {
+  ul.parent-menu > li > ul {
     list-style: none;
     padding: 0;
     position: absolute;
@@ -78,7 +78,7 @@ body {
     background: rgba(234, 234, 234, 0.92);
   }
 
-  ul.parent-manu > li > ul > li{
+  ul.parent-menu > li > ul > li{
     padding: 9px;
     padding-right: 45px;
     position: relative;
@@ -87,17 +87,17 @@ body {
     min-width: 85px;
   }
 
-  ul.parent-manu > li > ul > li.disabled {
+  ul.parent-menu > li > ul > li.disabled {
     color: #818181;
   }
 
-  ul.parent-manu > li > ul > li.split {
+  ul.parent-menu > li > ul > li.split {
     border-bottom-width: 1px;
     border-bottom-style: solid;
     border-bottom-color: rgba(220, 220, 220, 0.92);
   }
 
-  ul.parent-manu > li > ul > li > .shortcut {
+  ul.parent-menu > li > ul > li > .shortcut {
     position: absolute;
     top: 9px;
     right: 9px;
@@ -387,8 +387,12 @@ body {
   margin: 10px 0;
 }
 
-.utilities .utility-window.archive #archive-thumbs-screen #archive-thumbs .archive-thumb img {
+.utilities .utility-window.archive #archive-thumbs-screen #archive-thumbs .archive-thumb svg {
   background: white;
+}
+
+.utilities .utility-window.archive #archive-thumbs-screen #archive-thumbs .archive-thumb svg.active {
+  border: 3px solid rgb(70, 180, 200);
 }
 
 .utilities .utility-window.archive div[empty] {
@@ -434,3 +438,28 @@ body {
 
 
 
+.utilities .adjust {
+  width: 200px;
+  height: 160px;
+  margin-left: 40px;
+}
+.utilities .adjust .adjust-val-label {
+  display: inline-block;
+  padding: 5px;
+  padding-left: 20px;
+  width: 30px;
+}
+.utilities .adjust input {
+  width: 120px;
+  margin: 5px;
+  margin-left: 5px;
+  background: white;
+  display: inline-block;
+  padding: 7px;
+  font-size: 12px;
+  margin-left: -1px;
+  font-family: Maven Pro, 'Maven Pro';
+  border: none;
+  border-bottom: 1px solid rgba(220, 220, 220, 0.92);
+  text-align: right;
+}

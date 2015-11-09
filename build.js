@@ -45,6 +45,7 @@ var board = new Vue({
     tool: 'select',
     fileFieldListened: false,
     obj: {},
+    topmenu: '',
     dragging: false,
     deltaX: 0,
     deltaY: 0,
@@ -61,10 +62,24 @@ var board = new Vue({
       active: true,
       visible: true,
       shapes: [{
+        id: '2',
+        name: 'line',
+        x1: 10,
+        y1: 20,
+        x2: 100,
+        y2: 200,
+        selected: false,
+        removed: false
+      }]
+    }, {
+      name: 'layer-2',
+      active: false,
+      visible: true,
+      shapes: [{
         id: '0',
         name: 'circle',
-        cx: 75,
-        cy: 75,
+        cx: 150,
+        cy: 250,
         r: 75,
         selected: false,
         removed: false
@@ -75,15 +90,6 @@ var board = new Vue({
         y: 20,
         width: 200,
         height: 100,
-        selected: false,
-        removed: false
-      }, {
-        id: '2',
-        name: 'line',
-        x1: 10,
-        y1: 20,
-        x2: 100,
-        y2: 200,
         selected: false,
         removed: false
       }]
@@ -103,6 +109,10 @@ var board = new Vue({
     this.shapes = this.layers[0].shapes;
   },
   methods: {
+    toggleMenu: function (menu) {
+
+      if (this.topmenu == menu) this.topmenu = '';else this.topmenu = menu;
+    },
     onTool: function (tool) {
 
       if (tool == 'delete') {
@@ -111,6 +121,18 @@ var board = new Vue({
       }
 
       if (tool == 'zoom') {
+        this.viewBoxWidth += 20;
+        this.viewBoxHeight += 20;
+        return;
+      }
+
+      if (tool == 'zoomin') {
+        this.viewBoxWidth -= 20;
+        this.viewBoxHeight -= 20;
+        return;
+      }
+
+      if (tool == 'zoomout') {
         this.viewBoxWidth += 20;
         this.viewBoxHeight += 20;
         return;
@@ -346,6 +368,9 @@ var board = new Vue({
           var target_id = ev.target.attributes['data-id'].value;
           var target_name = ev.target.tagName;
           var shape = _.find(this.shapes, { 'id': target_id });
+
+          if (!shape) return;
+
           this.obj = shape;
           shape.selected = true;
           // console.log('id')
@@ -375,12 +400,20 @@ var board = new Vue({
     }
   },
   components: {
-    'shape': {
+    'layyer': {
       props: {
-        shape: Object,
-        clicked: Function
+        layer: Object
       },
-      template: '#shape-template'
+      template: '#layyer-template',
+      components: {
+        'shape': {
+          props: {
+            shape: Object,
+            clicked: Function
+          },
+          template: '#shape-template'
+        }
+      }
     }
   }
 });
