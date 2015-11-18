@@ -1,5 +1,15 @@
 var Vue = require('vue');
+var Rx = require('rx');
 var _ = require('lodash');
+
+var source = Rx.Observable.range(1, 5);
+
+// Prints out each item
+var subscription = source.subscribe(
+  function (x) { console.log('onNext: %s', x); },
+  function (e) { console.log('onError: %s', e); },
+  function () { console.log('onCompleted'); });
+
 
 
 function convert(svg, cb) {
@@ -47,10 +57,17 @@ var board = new Vue({
     obj: {},
     topmenu: '',
     dragging: false,
+    normalize: true,
+    measure: false,
+    measurex1: 0,
+    measurey1: 0,
+    measurex2: 0,
+    measurey2: 0,
+    showGrid: false,
     deltaX: 0,
     deltaY: 0,
-    posX: 0,
-    posY: 0,
+    offsetX: 0,
+    offsetY: 0,
     // viewBox: '0 0 600 600',
     viewBoxX: 0,
     viewBoxY: 0,
@@ -61,7 +78,7 @@ var board = new Vue({
     layers: [
       {
         name: 'layer-1',
-        active: true,
+        active: false,
         visible: true,
         shapes: [
         {
@@ -78,7 +95,7 @@ var board = new Vue({
       },
       {
         name: 'layer-2',
-        active: false,
+        active: true,
         visible: true,
         shapes: [
         {
@@ -115,7 +132,7 @@ var board = new Vue({
     }
   },
   created: function() {
-    this.shapes = this.layers[0].shapes
+    this.shapes = this.layers[1].shapes
   },
   methods: {
     toggleMenu: function(menu) {
@@ -125,8 +142,18 @@ var board = new Vue({
     },
     onTool: function(tool) {
 
+      if (tool == 'normalize') {
+        this.normalize = !this.normalize
+        return
+      }
+
       if (tool == 'delete') {
         this.obj.removed = true
+        return
+      }
+
+      if (tool == 'grid') {
+        this.showGrid = !this.showGrid
         return
       }
 
@@ -214,8 +241,6 @@ var board = new Vue({
             result.push((color > 0) ? 1 : 0)
           }
           
-          console.log(result.length)
-          console.log(result.join(','))
           downloadFile('export.csv', result.join(','))
 
         });
@@ -268,13 +293,35 @@ var board = new Vue({
       this.deltaY = ev.offsetY - this.offsetY;
       this.offsetX = ev.offsetX;
       this.offsetY = ev.offsetY;
-      //
-      console.log('down')
+      
       this.dragging = true;
+
+      if (this.tool == 'measure') {
+        this.measure = true;
+        this.measurex1 = this.offsetX;
+        this.measurey1 = this.offsetY;
+        this.measurex2 = this.offsetX;
+        this.measurey2 = this.offsetY;
+        return 
+      }
 
       if (ev.target && !ev.target.attributes['data-id'] || ev.target && ev.target.attributes['data-id'] && this.obj && ev.target.attributes['data-id'] != this.obj.id) {
         this.obj.selected = false
       }
+
+
+      if (ev.target && !ev.target.attributes['data-id']) {
+        this.obj.selected = false
+        this.obj = {}
+      } else if (ev.target && ev.target.attributes['data-id'] && this.obj && ev.target.attributes['data-id'] != this.obj.id) {
+        this.obj.selected = false
+
+        var target_id = ev.target.attributes['data-id'].value;
+        this.obj = _.find(this.shapes, { 'id': target_id })
+        if (this.obj) this.obj.selected = true
+        else this.obj = {}
+      }
+
 
       if (this.tool == 'rectangle') {
         var new_id = this.shapes.length.toString()
@@ -331,30 +378,77 @@ var board = new Vue({
       this.deltaY = ev.offsetY - this.offsetY;
       this.offsetX = ev.offsetX;
       this.offsetY = ev.offsetY;
-      //
-      console.log('up')
       this.dragging = false;
 
-      // clear rectangle or circle
-      // this.obj.selected = false;
-      // this.obj = {};
+      if (this.tool == 'measure' && this.measure) {
+        return 
+      }
     },
     onBoardMouseMove: function(ev) {
       this.deltaX = ev.offsetX - this.offsetX;
       this.deltaY = ev.offsetY - this.offsetY;
       this.offsetX = ev.offsetX;
       this.offsetY = ev.offsetY;
-      //
-      // console.log(ev)
+      
       if (this.dragging) {
-        // console.log('drag')
 
         if (this.tool == 'pan') {
           this.viewBoxX -= this.deltaX;
           this.viewBoxY -= this.deltaY;
+          return
+        }
+
+        if (this.tool == 'moveLayer' && this.deltaX && this.deltaY) {
+          var self = this;
+          this.shapes.forEach(function(shape){
+            if (shape.name == 'rect') {
+              console.log(shape)
+              console.log(self.deltaX)
+              shape.x += self.deltaX;
+              shape.y += self.deltaY;
+              console.log(shape.x)
+            } else if (shape.name == 'circle') {
+              shape.cx += self.deltaX;
+              shape.cy += self.deltaY;
+            } else if (shape.name == 'line') {
+              shape.x1 += self.deltaX;
+              shape.y1 += self.deltaY;
+              shape.x2 += self.deltaX;
+              shape.y2 += self.deltaY;
+            }
+          })
           return 
         }
 
+      if (this.tool == 'measure' && this.measure) {
+        this.measurex2 = this.offsetX;
+        this.measurey2 = this.offsetY;
+        return 
+      }
+
+        // creating normalized shapes
+        if (this.tool == 'rectangle' && this.obj.id && this.normalize) {
+          var shape = this.obj
+          shape.width = (this.offsetX - shape.x)
+          shape.height = shape.width
+          return 
+        }
+
+        if (this.tool == 'line' && this.obj.id && this.normalize) {
+          var shape = this.obj
+          if (Math.abs(this.offsetY - shape.y1) < Math.abs(this.offsetX - shape.x1) / 2) {
+            shape.x2 = this.offsetX
+          } else if (Math.abs(this.offsetX - shape.x1) < Math.abs(this.offsetY - shape.y1) / 2) {
+            shape.y2 = this.offsetY
+          } else {
+            shape.x2 = this.offsetX
+            var lng = this.offsetX - shape.x1
+            shape.y2 = shape.y1 + Math.abs(lng) * (this.offsetY >= shape.y1 ? 1 : -1)
+          }
+          return 
+        }
+
+        // creating shapes
         if (this.tool == 'circle' && this.obj.id) {
           var shape = this.obj
           if (shape.r > 0) shape.r += this.deltaX
@@ -374,30 +468,18 @@ var board = new Vue({
           shape.y2 += this.deltaY
           return 
         }
-          // console.log(ev.target)
 
-        if (ev.target && ev.target.attributes['data-id']) {
-          var target = ev.target;
-          var target_id = ev.target.attributes['data-id'].value;
-          var target_name = ev.target.tagName
-          var shape = _.find(this.shapes, { 'id': target_id })
+        // dragging shapes
+        if (this.obj && this.obj.name) {
+          var shape = this.obj
 
-          if (!shape) return
-
-          this.obj = shape
-          shape.selected = true
-          // console.log('id')
-          // console.log(this.deltaX)
-          console.log(target)
-          console.log(shape)
-
-          if (ev.target.tagName == 'rect') {
+          if (shape.name == 'rect') {
             shape.x += this.deltaX
             shape.y += this.deltaY
-          } else if (ev.target.tagName == 'circle') {
+          } else if (shape.name == 'circle') {
             shape.cx += this.deltaX
             shape.cy += this.deltaY
-          } else if (ev.target.tagName == 'line') {
+          } else if (shape.name == 'line') {
             shape.x1 += this.deltaX
             shape.y1 += this.deltaY
             shape.x2 += this.deltaX
@@ -410,9 +492,6 @@ var board = new Vue({
         // console.log('move')
       }
     },
-    onBoardMouseDrag: function(ev) {
-      //
-    },
   },
   components: {
     'layyer' : {
@@ -424,7 +503,6 @@ var board = new Vue({
         'shape' : {
           props: {
             shape: Object,
-            clicked: Function,
           } ,
           template: '#shape-template',
         }
