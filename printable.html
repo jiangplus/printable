@@ -20,7 +20,7 @@
   </script>
 
   <div class="canvas-wrap">
-    <svg class="canvas"  viewbox="{{viewBox}}" v-on:click="doThat" v-on:mousedown="onBoardMouseDown" v-on:mouseup="onBoardMouseUp"  v-on:mousemove="onBoardMouseMove">
+    <svg class="canvas"  viewbox="{{viewBox}}" v-on:mousedown="onBoardMouseDown" v-on:mouseup="onBoardMouseUp"  v-on:mousemove="onBoardMouseMove">
       <line v-if="showGrid" x1="0" y1="100" x2="600" y2="100" stroke="#333333" stroke-width="1"/>
       <line v-if="showGrid" x1="0" y1="200" x2="600" y2="200" stroke="#333333" stroke-width="1"/>
       <line v-if="showGrid" x1="0" y1="300" x2="600" y2="300" stroke="#333333" stroke-width="1"/>

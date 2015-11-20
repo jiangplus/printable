@@ -240,21 +240,6 @@ var board = new Vue({
 
       this.tool = tool;
     },
-    doThat: function (ev) {
-      // console.log('board')
-      // console.log(ev.offsetX)
-      // console.log(ev.offsetY)
-      // console.log(ev.target)
-      // console.log(ev)
-
-    },
-    doThis: function (ev, obj) {
-      // console.log('shape')
-      // console.log(ev)
-      // console.log(this)
-      // console.log(obj.name)
-      // console.log(obj.x)
-    },
     deleteLayer: function (ev) {},
     newLayer: function (ev) {
       var layerName = 'layer-' + this.layers.length;
@@ -271,7 +256,6 @@ var board = new Vue({
       this.shapes = layer.shapes;
     },
     selectLayer: function (ev, layer) {
-      //
       var oldLayer = _.find(this.layers, { 'active': true });
       oldLayer.active = false;
       layer.active = true;
@@ -388,8 +372,6 @@ var board = new Vue({
           var self = this;
           this.shapes.forEach(function (shape) {
             if (shape.name == 'rect') {
-              console.log(shape);
-              console.log(self.deltaX);
               shape.x += self.deltaX;
               shape.y += self.deltaY;
               console.log(shape.x);
