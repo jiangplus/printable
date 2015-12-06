@@ -3,7 +3,18 @@ var Vue = require('vue');
 var Rx = require('rx');
 var _ = require('lodash');
 
-var source = Rx.Observable.range(1, 5);
+// var source = Rx.Observable.range(1, 5).map(x => x * x);
+
+var source = Rx.Observable.create(function (observer) {
+  // Yield a single value and complete
+  observer.onNext(42);
+  observer.onCompleted();
+
+  // Any cleanup logic might go here
+  return function () {
+    console.log('disposed');
+  };
+});
 
 // Prints out each item
 var subscription = source.subscribe(function (x) {
@@ -49,6 +60,44 @@ var saveFile = function (data, filename) {
   save_link.dispatchEvent(event);
 };
 
+var initLayers = [{
+  name: 'layer-1',
+  active: false,
+  visible: true,
+  shapes: [{
+    id: '2',
+    name: 'line',
+    x1: 10,
+    y1: 20,
+    x2: 100,
+    y2: 200,
+    selected: false,
+    removed: false
+  }]
+}, {
+  name: 'layer-2',
+  active: true,
+  visible: true,
+  shapes: [{
+    id: '0',
+    name: 'circle',
+    cx: 150,
+    cy: 250,
+    r: 75,
+    selected: false,
+    removed: false
+  }, {
+    id: '1',
+    name: 'rect',
+    x: 10,
+    y: 20,
+    width: 200,
+    height: 100,
+    selected: false,
+    removed: false
+  }]
+}];
+
 var board = new Vue({
   el: '#board',
   debug: true,
@@ -76,43 +125,7 @@ var board = new Vue({
     viewBoxWidth: 600,
     viewBoxHeight: 600,
     shapes: [],
-    layers: [{
-      name: 'layer-1',
-      active: false,
-      visible: true,
-      shapes: [{
-        id: '2',
-        name: 'line',
-        x1: 10,
-        y1: 20,
-        x2: 100,
-        y2: 200,
-        selected: false,
-        removed: false
-      }]
-    }, {
-      name: 'layer-2',
-      active: true,
-      visible: true,
-      shapes: [{
-        id: '0',
-        name: 'circle',
-        cx: 150,
-        cy: 250,
-        r: 75,
-        selected: false,
-        removed: false
-      }, {
-        id: '1',
-        name: 'rect',
-        x: 10,
-        y: 20,
-        width: 200,
-        height: 100,
-        selected: false,
-        removed: false
-      }]
-    }]
+    layers: initLayers
   },
   computed: {
     world: function () {
@@ -120,8 +133,6 @@ var board = new Vue({
     },
     viewBox: function () {
       return [this.viewBoxX, this.viewBoxY, this.viewBoxWidth, this.viewBoxHeight].join(' ');
-      // console.log([this.viewBoxX, this.viewBoxY, this.viewBoxWidth, this.viewBoxHeight].join(' '))
-      // return '0 0 300 300'
     }
   },
   created: function () {
@@ -277,6 +288,23 @@ var board = new Vue({
         this.measurey2 = this.offsetY;
         return;
       }
+
+      // var source = Rx.Observable.create(function (observer) {
+      //   // Yield a single value and complete
+      //   observer.onNext(ev);
+      //   observer.onCompleted();
+
+      //   // Any cleanup logic might go here
+      //   return function () {
+      //     console.log('disposed');
+      //   }
+      // });
+
+      // // Prints out each item
+      // var subscription = source.subscribe(
+      //   function (x) { console.log('onNext: %s', x); },
+      //   function (e) { console.log('onError: %s', e); },
+      //   function () { console.log('onCompleted'); });
 
       if (ev.target && !ev.target.attributes['data-id'] || ev.target && ev.target.attributes['data-id'] && this.obj && ev.target.attributes['data-id'] != this.obj.id) {
         this.obj.selected = false;
