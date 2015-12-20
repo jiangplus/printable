@@ -195,6 +195,14 @@ var board = new Vue({
         return;
       }
 
+      if (tool == 'normal') {
+        this.viewBoxWidth = 600;
+        this.viewBoxHeight = 600;
+        this.viewBoxX = 0;
+        this.viewBoxY = 0;
+        return;
+      }
+
       if (tool == 'dumpSVG') {
         var content = document.querySelector('svg.canvas').outerHTML;
         content = content.replace('svg', "svg xmlns='http://www.w3.org/2000/svg'");
@@ -515,10 +523,6 @@ var board = new Vue({
 
           var x2 = this.offsetX;
           var y2 = this.offsetY;
-
-          this.q1 = (y2 - shape.y1) / (x2 - shape.x1);
-
-          console.log(this.q1);
 
           var rate0 = (y2 - shape.y1) / (x2 - shape.x1);
           var rate = Math.abs(rate0);
