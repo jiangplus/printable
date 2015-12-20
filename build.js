@@ -123,6 +123,9 @@ var board = new Vue({
     measurey2: 0,
     showGrid: true,
     gridify: true,
+    draggingObj: true,
+    draggingDeltaX: 0,
+    draggingDeltaY: 0,
     deltaX: 0,
     deltaY: 0,
     offsetX: 0,
@@ -390,6 +393,12 @@ var board = new Vue({
         this.shapes.push(shape);
         return;
       }
+
+      if (this.obj && this.obj.name) {
+        this.draggingObj = true;
+        this.draggingDeltaX = 0;
+        this.draggingDeltaY = 0;
+      }
     },
     onBoardMouseUp: function (ev) {
       this.deltaX = ev.offsetX - this.offsetX;
@@ -445,8 +454,15 @@ var board = new Vue({
         }
 
         if (this.tool == 'measure' && this.measure) {
-          this.measurex2 = this.offsetX;
-          this.measurey2 = this.offsetY;
+
+          if (this.gridify) {
+            this.measurex2 = roundGrid(this.offsetX);
+            this.measurey2 = roundGrid(this.offsetY);
+          } else {
+            this.measurex2 = this.offsetX;
+            this.measurey2 = this.offsetY;
+          }
+
           return;
         }
 
@@ -541,6 +557,25 @@ var board = new Vue({
         // dragging shapes
         if (this.obj && this.obj.name) {
           var shape = this.obj;
+
+          if (this.gridify) {
+            this.draggingDeltaX += this.deltaX;
+            this.draggingDeltaY += this.deltaY;
+
+            if (Math.abs(this.draggingDeltaX) > 10) {
+              this.deltaX = 10 * this.draggingDeltaX / Math.abs(this.draggingDeltaX);
+              this.draggingDeltaX -= this.deltaX;
+            } else {
+              this.deltaX = 0;
+            }
+
+            if (Math.abs(this.draggingDeltaY) > 10) {
+              this.deltaY = 10 * this.draggingDeltaY / Math.abs(this.draggingDeltaY);
+              this.draggingDeltaY -= this.deltaY;
+            } else {
+              this.deltaY = 0;
+            }
+          }
 
           if (shape.name == 'rect') {
             shape.x += this.deltaX;
