@@ -21,17 +21,14 @@
 
   <div class="canvas-wrap">
     <svg class="canvas"  viewbox="{{viewBox}}" v-on:mousedown="onBoardMouseDown" v-on:mouseup="onBoardMouseUp"  v-on:mousemove="onBoardMouseMove">
-      <line v-if="showGrid" x1="0" y1="100" x2="600" y2="100" stroke="#333333" stroke-width="1"/>
-      <line v-if="showGrid" x1="0" y1="200" x2="600" y2="200" stroke="#333333" stroke-width="1"/>
-      <line v-if="showGrid" x1="0" y1="300" x2="600" y2="300" stroke="#333333" stroke-width="1"/>
-      <line v-if="showGrid" x1="0" y1="400" x2="600" y2="400" stroke="#333333" stroke-width="1"/>
-      <line v-if="showGrid" x1="0" y1="500" x2="600" y2="500" stroke="#333333" stroke-width="1"/>
 
-      <line v-if="showGrid" x1="100" y1="0" x2="100" y2="600" stroke="#333333" stroke-width="1"/>
-      <line v-if="showGrid" x1="200" y1="0" x2="200" y2="600" stroke="#333333" stroke-width="1"/>
-      <line v-if="showGrid" x1="300" y1="0" x2="300" y2="600" stroke="#333333" stroke-width="1"/>
-      <line v-if="showGrid" x1="400" y1="0" x2="400" y2="600" stroke="#333333" stroke-width="1"/>
-      <line v-if="showGrid" x1="500" y1="0" x2="500" y2="600" stroke="#333333" stroke-width="1"/>
+      <template v-for="n in 60">
+        <line v-if="showGrid" :x1="viewBoxX" :y1="(n+1)*10 + (Math.floor(viewBoxY / 10)*10)" :x2="viewBoxX + viewBoxWidth" :y2="(n+1)*10 + (Math.floor(viewBoxY / 10)*10)" stroke="#333333" stroke-width="1"/>
+      </template>
+
+      <template v-for="n in 60">
+        <line v-if="showGrid" :x1="(n+1)*10 + (Math.floor(viewBoxX / 10)*10)" :y1="viewBoxY" :x2="(n+1)*10 + (Math.floor(viewBoxX / 10)*10)" :y2="viewBoxY + viewBoxHeight" stroke="#333333" stroke-width="1"/>
+      </template>
       
       <layyer v-for="layer in layers" :layer="layer" />
 
@@ -55,6 +52,7 @@
       <li v-on:click="toggleMenu('edit')">
         <span>Edit</span>
         <ul v-show="topmenu == 'edit'">
+          <li v-on:click="onTool('gridify')"> Gridify </li>
           <li v-on:click="onTool('normalize')"> Normalize </li>
           <li v-on:click="onTool('measure')"> Measure </li>
           <li v-on:click="onTool('select')"> Select </li>
@@ -98,8 +96,7 @@
         <span>Sign in</span>
         <div class="form" v-show="topmenu == 'signin'">
           <p>
-            You can get more out of Mondrian if you make an account.
-            Save all your undos, connect to your Dropbox, and more.
+            test here
             </p>
           <input type="text" class="white" placeholder="Email" id="login-email-input">
           <input type="password" class="white" placeholder="Password" id="login-passwd-input" h="">
@@ -119,7 +116,7 @@
 
   <div id="tool-palette">
     <div class="tool-button" tool="offset" v-on:click="onTool('offset')">
-      <div class="tool-info">{{offsetX}},{{offsetY}}</div>
+      <div class="tool-info">{{offsetX + viewBoxX}},{{offsetY + viewBoxY}} : {{viewBox}}</div>
     </div>
     <div class="tool-button" tool="cursor" v-on:click="onTool('select')">
       <div class="tool-info">Cursor

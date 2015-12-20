@@ -25,6 +25,7 @@ var subscription = source.subscribe(function (x) {
   console.log('onCompleted');
 });
 
+// convert SVG to Canvas
 function convert(svg, cb) {
   var canvas = document.createElement('canvas');
   var ctx = canvas.getContext('2d');
@@ -40,6 +41,7 @@ function convert(svg, cb) {
   image.src = 'data:image/svg+xml;base64,' + btoa(new XMLSerializer().serializeToString(svg));
 };
 
+// download text content
 function downloadFile(fileName, content) {
   var aLink = document.createElement('a');
   var blob = new Blob([content]);
@@ -50,6 +52,7 @@ function downloadFile(fileName, content) {
   aLink.dispatchEvent(evt);
 }
 
+// download image content
 var saveFile = function (data, filename) {
   var save_link = document.createElementNS('http://www.w3.org/1999/xhtml', 'a');
   save_link.href = data;
@@ -114,12 +117,12 @@ var board = new Vue({
     measurey1: 0,
     measurex2: 0,
     measurey2: 0,
-    showGrid: false,
+    showGrid: true,
+    gridify: true,
     deltaX: 0,
     deltaY: 0,
     offsetX: 0,
     offsetY: 0,
-    // viewBox: '0 0 600 600',
     viewBoxX: 0,
     viewBoxY: 0,
     viewBoxWidth: 600,
@@ -196,7 +199,6 @@ var board = new Vue({
         var fileField = document.getElementById('fileField');
         if (!this.fileFieldListened) {
           fileField.addEventListener('change', function (x) {
-            console.log(x.target.files);
             if (x.target.files.length > 0) {
               var file = x.target.files[0];
               window.target = file;
