@@ -267,9 +267,38 @@ var board = new Vue({
 
       this.tool = tool;
     },
-    deleteLayer: function (ev) {},
+    deleteLayer: function (ev) {
+      this.layers.splice(this.layers.findIndex(function (x) {
+        return x.active;
+      }), 1);
+      if (this.layers.length > 0) {
+        var layer = this.layers[this.layers.length - 1];
+        layer.active = true;
+        this.shapes = layer.shapes;
+      }
+    },
+    moveLayerUp: function (ev) {
+      var index = this.layers.findIndex(function (x) {
+        return x.active;
+      });
+      if (index > 0) {
+        var otherLayer = this.layers[index - 1];
+        this.layers.$set([index - 1], this.layers[index]);
+        this.layers.$set([index], otherLayer);
+      }
+    },
+    moveLayerDown: function (ev) {
+      var index = this.layers.findIndex(function (x) {
+        return x.active;
+      });
+      if (index < this.layers.length - 1) {
+        var otherLayer = this.layers[index + 1];
+        this.layers.$set([index + 1], this.layers[index]);
+        this.layers.$set([index], otherLayer);
+      }
+    },
     newLayer: function (ev) {
-      var layerName = 'layer-' + this.layers.length;
+      var layerName = 'layer-' + Math.floor(Math.random() * 1000000);
       var layer = {
         name: layerName,
         active: true,
