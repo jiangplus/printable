@@ -38,6 +38,10 @@ function convert(svg, cb) {
   image.src = 'data:image/svg+xml;base64,' + btoa(new XMLSerializer().serializeToString(svg));
 };
 
+function roundGrid(x) {
+  return Math.round(x / 10) * 10
+}
+
 // download text content
 function downloadFile(fileName, content){
     var aLink = document.createElement('a');
@@ -130,6 +134,8 @@ var board = new Vue({
     offsetY: 0,
     viewBoxX: 0,
     viewBoxY: 0,
+    q1: 0,
+    q2: 0,
     viewBoxWidth: 600,
     viewBoxHeight: 600,
     shapes: [],
@@ -158,6 +164,11 @@ var board = new Vue({
 
       if (tool == 'normalize') {
         this.normalize = !this.normalize
+        return
+      }
+
+      if (tool == 'gridify') {
+        this.gridify = !this.gridify
         return
       }
 
@@ -290,15 +301,22 @@ var board = new Vue({
       this.deltaY = ev.offsetY - this.offsetY;
       this.offsetX = ev.offsetX;
       this.offsetY = ev.offsetY;
+
+      this.offsetGridX = this.offsetX;
+      this.offsetGridY = this.offsetY;
+      if (this.gridify) {
+        this.offsetGridX = Math.round(this.offsetX /10) * 10;
+        this.offsetGridY = Math.round(this.offsetY /10) * 10;
+      }
       
       this.dragging = true;
 
       if (this.tool == 'measure') {
         this.measure = true;
-        this.measurex1 = this.offsetX;
-        this.measurey1 = this.offsetY;
-        this.measurex2 = this.offsetX;
-        this.measurey2 = this.offsetY;
+        this.measurex1 = this.offsetGridX;
+        this.measurey1 = this.offsetGridY;
+        this.measurex2 = this.offsetGridX;
+        this.measurey2 = this.offsetGridY;
         return 
       }
 
@@ -342,8 +360,8 @@ var board = new Vue({
         var shape = {
           id: new_id,
           name: 'rect',
-          x: this.offsetX,
-          y: this.offsetY,
+          x: this.offsetGridX,
+          y: this.offsetGridY,
           width: 1,
           height: 1,
           selected: true,
@@ -359,8 +377,8 @@ var board = new Vue({
         var shape = {
           id: new_id,
           name: 'circle',
-          cx: this.offsetX,
-          cy: this.offsetY,
+          cx: this.offsetGridX,
+          cy: this.offsetGridY,
           r: 1,
           selected: true,
           removed: false
@@ -375,10 +393,10 @@ var board = new Vue({
         var shape = {
           id: new_id,
           name: 'line',
-          x1: this.offsetX,
-          y1: this.offsetY,
-          x2: this.offsetX,
-          y2: this.offsetY,
+          x1: this.offsetGridX,
+          y1: this.offsetGridY,
+          x2: this.offsetGridX,
+          y2: this.offsetGridY,
           selected: true,
           removed: false
         };
@@ -404,6 +422,16 @@ var board = new Vue({
       this.offsetX = ev.offsetX;
       this.offsetY = ev.offsetY;
       
+
+      if (this.gridify) {
+        this.offsetGridX = Math.round(this.offsetX /10) * 10;
+        this.offsetGridY = Math.round(this.offsetY /10) * 10;
+      } else {
+        this.offsetGridX = this.offsetX;
+        this.offsetGridY = this.offsetY;
+      }
+
+
       if (this.dragging) {
 
         if (this.tool == 'pan') {
@@ -441,43 +469,88 @@ var board = new Vue({
         // creating normalized shapes
         if (this.tool == 'rectangle' && this.obj.id && this.normalize) {
           var shape = this.obj
-          shape.width = (this.offsetX - shape.x)
-          shape.height = shape.width
+
+          if (this.gridify) {
+            shape.width = roundGrid(Math.abs(shape.x - this.offsetX))
+            shape.height = shape.width
+          } else {
+            shape.width = (this.offsetX - shape.x)
+            shape.height = shape.width
+          }
+
           return 
         }
 
         if (this.tool == 'line' && this.obj.id && this.normalize) {
           var shape = this.obj
-          if (Math.abs(this.offsetY - shape.y1) < Math.abs(this.offsetX - shape.x1) / 2) {
-            shape.x2 = this.offsetX
-          } else if (Math.abs(this.offsetX - shape.x1) < Math.abs(this.offsetY - shape.y1) / 2) {
-            shape.y2 = this.offsetY
-          } else {
-            shape.x2 = this.offsetX
-            var lng = this.offsetX - shape.x1
-            shape.y2 = shape.y1 + Math.abs(lng) * (this.offsetY >= shape.y1 ? 1 : -1)
+
+          var x2 = this.offsetX
+          var y2 = this.offsetY
+
+          this.q1 = (y2-shape.y1)/(x2-shape.x1)
+
+          console.log(this.q1)
+
+          var rate0 = (y2-shape.y1)/(x2-shape.x1)
+          var rate = Math.abs(rate0)
+
+          if (this.gridify) {
+            x2 = roundGrid(x2)
+            y2 = roundGrid(y2)
           }
+
+          if (rate <= 0.5) {
+             shape.x2 = x2
+             shape.y2 = shape.y1
+          } else if (rate >= 2) {
+             shape.y2 = y2
+             shape.x2 = shape.x1
+          } else {
+             shape.x2 = x2
+             if (rate0 > 0) {
+               shape.y2 = (x2 - shape.x1) + shape.y1
+             } else {
+               shape.y2 = (shape.x1 - x2) + shape.y1
+             }
+          }
+
           return 
         }
 
         // creating shapes
         if (this.tool == 'circle' && this.obj.id) {
           var shape = this.obj
-          if (shape.r > 0) shape.r += this.deltaX
+          if (this.gridify) {
+            shape.r = roundGrid(Math.abs(shape.cx - this.offsetX))
+          } else {
+            if (shape.r > 0) shape.r += this.deltaX
+          }
           return 
         }
 
         if (this.tool == 'rectangle' && this.obj.id) {
           var shape = this.obj
-          shape.width += this.deltaX
-          shape.height += this.deltaY
+          if (this.gridify) {
+            shape.width = roundGrid(Math.abs(shape.x - this.offsetX))
+            shape.height = roundGrid(Math.abs(shape.y - this.offsetY))
+          } else {
+            shape.width += this.deltaX
+            shape.height += this.deltaY
+          }
+
           return 
         }
 
         if (this.tool == 'line' && this.obj.id) {
           var shape = this.obj
-          shape.x2 += this.deltaX
-          shape.y2 += this.deltaY
+          if (this.gridify) {
+            shape.x2  = roundGrid(this.offsetX)
+            shape.y2  = roundGrid(this.offsetY)
+          } else {
+            shape.x2 += this.deltaX
+            shape.y2 += this.deltaY
+          }
+
           return 
         }
 
