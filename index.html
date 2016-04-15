@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Printable</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+  <link href="css/font.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/app.css">
+  <style type="text/css">
+    body {
+      height: 100vh;
+      width: 100vw;
+    }
+
+    g.selected * {
+      fill: blue;
+    }
+  </style>
+</head>
+<body id="board">
+
+  <script type="text/x-template" id="rect-shape-template">
+    <rect v-if="!shape.removed"
+        v-bind:data-id="shape.id"
+        v-bind:rx="shape.radius"
+        v-bind:x="shape.x"
+        v-bind:y="shape.y"
+        v-bind:width="shape.width"
+        v-bind:height="shape.height"
+        v-bind:fill= "shape.selected ? 'blue' : 'white'"
+        v-bind:stroke="'gray'"
+        v-bind:stroke-width="2"
+        v-bind:data-parent-id="parent"
+        v-bind:data-layer-id="layer"
+        />
+  </script>
+
+  <script type="text/x-template" id="circle-shape-template">
+    <ellipse v-if="!shape.removed"
+        v-bind:data-id="shape.id"
+        v-bind:cx="shape.x+shape.width/2"
+        v-bind:cy="shape.y+shape.height/2"
+        v-bind:rx="shape.width/2"
+        v-bind:ry="shape.height/2"
+        v-bind:fill= "shape.selected ? 'blue' : 'white'"
+        v-bind:stroke="'gray'"
+        v-bind:stroke-width="2"
+        v-bind:data-parent-id="parent"
+        v-bind:data-layer-id="layer"
+        />
+  </script>
+
+  <script type="text/x-template" id="line-shape-template">
+    <line v-if="!shape.removed" 
+      v-bind:data-id="shape.id" 
+      v-bind:x1="shape.x1" 
+      v-bind:y1="shape.y1" 
+      v-bind:x2="shape.x2" 
+      v-bind:y2="shape.y2"
+      v-bind:stroke="shape.selected ? 'blue' : 'gray'" 
+      v-bind:stroke-width="10" 
+      v-bind:data-parent-id="parent"
+      v-bind:data-layer-id="layer"
+      />
+  </script>
+
+  <script type="text/x-template" id="group-shape-template">
+    <g v-if="!shape.removed"
+        v-bind:class="shape.selected ? 'selected' : ''"
+        v-bind:data-id="shape.id"
+        v-bind:transform="transform">
+
+      <template v-for="layer in shape.component.layers">
+          <component v-for="gshape in layer.shapes" v-if="layer.visible" :is="gshape.type" :shape="gshape" :parent="shape.id" :layer="layer.name"></component>
+      </template>
+    </g>
+  </script>
+
+
+  <svg id="canvas"
+    viewbox="{{viewBox}}"
+    width="{{originalViewBoxWidth}}"
+    height="{{originalViewBoxHeight}}" >
+
+    <template v-for="n in gridCount">
+      <line v-if="showGrid" :x1="viewBoxX" :y1="(n+1)*10 + (Math.floor(viewBoxY / 10)*10)" :x2="viewBoxX + viewBoxWidth" :y2="(n+1)*10 + (Math.floor(viewBoxY / 10)*10)" stroke="#333333" stroke-width="1" opacity="0.3" />
+    </template>
+
+    <template v-for="n in gridCount">
+      <line v-if="showGrid" :x1="(n+1)*10 + (Math.floor(viewBoxX / 10)*10)" :y1="viewBoxY" :x2="(n+1)*10 + (Math.floor(viewBoxX / 10)*10)" :y2="viewBoxY + viewBoxHeight" stroke="#333333" stroke-width="1" opacity="0.3" />
+    </template>
+
+    <component v-if="view == 'board'" v-for="shape in shapes" :is="shape.type" :shape="shape"></component>
+
+    <template v-if="view == 'component'">
+	    <template v-for="layer in currentComponent.layers">
+	      <component v-for="gshape in layer.shapes" v-if="layer.visible" :is="gshape.type" :shape="gshape" :layer="layer.name"></component>
+	    </template>
+    </template>
+
+  </svg>
+
+
+  <div class="menu-nav" v-bind:style="toolStyleOffset">
+    <ul class="parent-menu">
+      <li v-on:click="toggleMenu('file')">
+        <span>File</span>
+        <ul v-show="topmenu == 'file'">
+          <li v-on:click="setTool('dumpSVG')"> Dump SVG </li>
+          <li v-on:click="setTool('dumpPNG')"> Dump PNG </li>
+          <li v-on:click="setTool('dumpCSV')"> Dump CSV </li>
+          <li v-on:click="setTool('dumpJSON')"> Dump JSON </li>
+          <li v-on:click="setTool('loadJSON')"> Load JSON </li>
+        </ul>
+      </li>
+      <li v-on:click="toggleMenu('edit')">
+        <span>Edit</span>
+        <ul v-show="topmenu == 'edit'">
+          <li v-on:click="setTool('gridify')" class="{{gridify ? 'red' : ''}}"> Gridify </li>
+          <li v-on:click="setTool('normalize')" class="{{normalize ? 'red' : ''}}"> Normalize </li>
+          <li v-on:click="setTool('measure')"> Measure </li>
+          <li v-if="false" v-on:click="setTool('group')"> Group </li>
+          <li v-if="false" v-on:click="setTool('ungroup')"> Ungroup </li>
+          <li v-on:click="setTool('select')"> Select </li>
+          <li v-on:click="setTool('delete')"> Delete </li>
+        </ul>
+      </li>
+      <li v-if="false" v-on:click="toggleMenu('layer')">
+        <span>Layers</span>
+        <ul v-show="topmenu == 'layer'">
+          <li class="split" v-on:click="">New</li>
+          <li v-on:click="setTool('moveLayer')">Move</li>
+          <li v-on:click="">Delete</li>
+          <li v-on:click="">Move Up</li>
+          <li v-on:click="">Move Down</li>
+        </ul>
+      </li>
+      <li v-on:click="toggleMenu('geometry')">
+        <span>Geometry</span>
+        <ul v-show="topmenu == 'geometry'">
+          <li v-on:click="setTool('select')">Select</li>
+          <li v-on:click="setTool('component')">Component</li>
+          <li v-on:click="setTool('rect')">Rectangle</li>
+          <li v-on:click="setTool('circle')">Circle</li>
+          <li v-on:click="setTool('line')">Line</li>
+        </ul>
+      </li>
+      <li v-on:click="toggleMenu('view')">
+        <span>View</span>
+        <ul v-show="topmenu == 'view'">
+          <li v-on:click="setTool('zoomin')"> Zoom In </li>
+          <li v-on:click="setTool('zoomout')"> Zoom Out </li>
+          <li v-on:click="setTool('zoom')"> Zoom </li>
+          <li v-on:click="setTool('pan')"> Pan </li>
+          <li v-on:click="setTool('grid')"> Grid </li>
+          <li v-on:click="setTool('board-view')"> Board </li>
+          <li v-on:click="setTool('component-view')"> Component </li>
+        </ul>
+      </li>
+      <li v-if="view == 'board'" v-on:click="toggleMenu('components')">
+        <span>Components</span>
+        <ul v-show="topmenu == 'components'">
+          <li v-for="component in components" v-on:click="setComponent(component)"> component </li>
+        </ul>
+      </li>
+      <li v-if="view == 'component'" v-on:click="toggleMenu('layers')">
+        <span>Layers</span>
+        <ul v-show="topmenu == 'layers'">
+          <li v-for="layer in currentComponent.layers" v-on:click="setLayer(layer)"> layer {{(layer.active)? '(active)' : ''}} </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <script src="build.js"></script>
+</body>
+</html>

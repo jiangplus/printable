@@ -1,0 +1,147 @@
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #f7f7f7;
+  moz-user-select: -moz-none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none; }
+
+.hide {
+  display: none !important; }
+
+ul {
+  list-style: none; }
+
+/* menu-nav */
+.menu-nav {
+  z-index: 12;
+  position: absolute;
+  left: 100px;
+  top: 20px;
+  /*display: none;*/ }
+
+.menu-nav ul.parent-menu > li > ul, .menu-nav ul.parent-menu > li > .form {
+  /*display: none;*/
+  /*display: block;*/ }
+.menu-nav ul.parent-menu > li > ul {
+  display: block; }
+.menu-nav ul.parent-menu > li {
+  margin-left: 15px;
+  cursor: url("assets/images/cursors/cursor.png") 1 1, default !important;
+  position: relative;
+  display: inline-block; }
+.menu-nav ul.parent-menu > li > span {
+  width: 100%;
+  height: 100%;
+  padding: 9px 10px;
+  background: #eaeaea; }
+.menu-nav ul.parent-menu > li > ul {
+  position: absolute;
+  white-space: nowrap;
+  margin-top: 40px;
+  margin-left: 0px;
+  padding: 0;
+  border-bottom: 1px solid gainsboro;
+  background: #eaeaea; }
+.menu-nav ul.parent-menu > li > ul > li {
+  padding: 9px;
+  padding-right: 45px;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  min-width: 85px; }
+.menu-nav ul.parent-menu > li > ul > li.disabled {
+  color: #818181; }
+.menu-nav ul.parent-menu > li > ul > li.split {
+  border-bottom: 1px solid gainsboro; }
+.menu-nav ul.parent-menu > li > ul > li > .shortcut {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  margin-left: 10px;
+  /*opacity: 0.5;*/ }
+
+/* tool-palette */
+#tool-palette .tool-button[tool="cursor"] {
+  background-image: url("../cursors/cursor.png");
+  background-repeat: no-repeat;
+  background-position: 14px 10px; }
+#tool-palette .tool-button[tool="pen"] {
+  background-image: url("../cursors/type-a.png");
+  background-repeat: no-repeat;
+  background-position: 13px 8px; }
+#tool-palette .tool-button[tool="crayon"] {
+  background-image: url("../cursors/crayon.png");
+  background-repeat: no-repeat;
+  background-position: 12px 8px; }
+#tool-palette .tool-button[tool="ellipse"] {
+  background-image: url("../cursors/ellipse.png");
+  background-repeat: no-repeat;
+  background-position: 10px 9px; }
+#tool-palette .tool-button[tool="rectangle"] {
+  background-image: url("../cursors/rectangle.png");
+  background-repeat: no-repeat;
+  background-position: 10px 9px; }
+#tool-palette .tool-button[tool="line"] {
+  background-image: url("../cursors/line.png");
+  background-repeat: no-repeat;
+  background-position: 10px 9px; }
+#tool-palette .tool-button[tool="rotate"] {
+  background-image: url("../cursors/rotate.png");
+  background-repeat: no-repeat;
+  background-position: 10px 9px; }
+#tool-palette .tool-button[tool="type"] {
+  background-image: url("../cursors/olivetti.png");
+  background-repeat: no-repeat;
+  background-position: 8px 9px; }
+#tool-palette .tool-button[tool="eyedropper"] {
+  background-image: url("../cursors/eyedropper.png");
+  background-repeat: no-repeat;
+  background-position: 10px 9px; }
+#tool-palette .tool-button[tool="zoom"] {
+  background-image: url("../cursors/loupe.png");
+  background-repeat: no-repeat;
+  background-position: 10px 9px; }
+#tool-palette .tool-button[tool="eyedropper"] {
+  background-image: url("../cursors/eyedropper.png");
+  background-repeat: no-repeat;
+  background-position: 10px 9px; }
+
+#tool-palette {
+  position: fixed;
+  left: 0;
+  top: 100px;
+  z-index: 10; }
+  #tool-palette .tool-button {
+    width: 36px;
+    height: 36px;
+    background-repeat: no-repeat;
+    border-bottom-width: 1px solid gainsboro;
+    cursor: url("../cursors/cursor.png") 1 1, default !important;
+    margin-left: 20px;
+    margin-bottom: 5px;
+    position: relative;
+    background: #eaeaea; }
+  #tool-palette .tool-info {
+    position: absolute;
+    white-space: nowrap;
+    top: 0;
+    left: 50px;
+    padding: 5px;
+    padding-right: 45px;
+    border-bottom: 1px solid gainsboro;
+    background: #eaeaea; }
+  #tool-palette .shortcut {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    margin-left: 10px;
+    /*opacity: 0.5; */ }
+
+/*# sourceMappingURL=app.css.map */
