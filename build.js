@@ -188,7 +188,7 @@ var app = window.app = new Vue({
       }, {
         name: 'layer-2',
         id: createId(),
-        visible: false,
+        visible: true,
         active: false,
         shapes: [{ type: 'line-shape', id: createId(), x1: 50, y1: 250, x2: 590, y2: 250, selected: false, removed: false }]
       }]
