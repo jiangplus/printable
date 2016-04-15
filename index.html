@@ -114,24 +114,21 @@
   <div class="menu-nav" v-bind:style="toolStyleOffset">
     <ul class="parent-menu">
       <li v-on:click="toggleMenu('file')">
-        <span>File</span>
+        <span>文件</span>
         <ul v-show="topmenu == 'file'">
-          <li v-on:click="setTool('dumpSVG')"> Dump SVG </li>
-          <li v-on:click="setTool('dumpPNG')"> Dump PNG </li>
-          <li v-on:click="setTool('dumpCSV')"> Dump CSV </li>
-          <li v-on:click="setTool('dumpJSON')"> Dump JSON </li>
-          <li v-on:click="setTool('loadJSON')"> Load JSON </li>
+          <li v-on:click="setTool('dumpSVG')"> 导出 SVG </li>
+          <li v-on:click="setTool('dumpPNG')"> 导出 PNG </li>
+          <li v-on:click="setTool('dumpCSV')"> 导出 CSV </li>
+          <li v-on:click="setTool('dumpJSON')"> 保存 </li>
+          <li v-on:click="setTool('loadJSON')"> 加载 </li>
         </ul>
       </li>
       <li v-on:click="toggleMenu('edit')">
-        <span>Edit</span>
+        <span>编辑</span>
         <ul v-show="topmenu == 'edit'">
-          <li v-on:click="setTool('gridify')" class="{{gridify ? 'red' : ''}}"> Gridify </li>
-          <li v-on:click="setTool('normalize')" class="{{normalize ? 'red' : ''}}"> Normalize </li>
-          <li v-on:click="setTool('measure')"> Measure </li>
-          <li v-if="false" v-on:click="setTool('group')"> Group </li>
-          <li v-if="false" v-on:click="setTool('ungroup')"> Ungroup </li>
-          <li v-on:click="setTool('select')"> Select </li>
+          <li v-on:click="setTool('gridify')" class="{{gridify ? 'red' : ''}}"> 图形网格化 </li>
+          <li v-on:click="setTool('normalize')" class="{{normalize ? 'red' : ''}}"> 图形正规化 </li>
+          <li v-on:click="setTool('measure')"> 测量 </li>
           <li v-on:click="setTool('delete')"> Delete </li>
         </ul>
       </li>
@@ -146,41 +143,43 @@
         </ul>
       </li>
       <li v-on:click="toggleMenu('geometry')">
-        <span>Geometry</span>
+        <span>绘图</span>
         <ul v-show="topmenu == 'geometry'">
-          <li v-on:click="setTool('select')">Select</li>
-          <li v-on:click="setTool('component')">Component</li>
-          <li v-on:click="setTool('rect')">Rectangle</li>
-          <li v-on:click="setTool('circle')">Circle</li>
-          <li v-on:click="setTool('line')">Line</li>
+          <li v-on:click="setTool('select')">选择</li>
+          <li v-on:click="setTool('component')">组件</li>
+          <li v-on:click="setTool('rect')">矩形</li>
+          <li v-on:click="setTool('circle')">圆形</li>
+          <li v-on:click="setTool('line')">线</li>
         </ul>
       </li>
       <li v-on:click="toggleMenu('view')">
-        <span>View</span>
+        <span>视图</span>
         <ul v-show="topmenu == 'view'">
-          <li v-on:click="setTool('zoomin')"> Zoom In </li>
-          <li v-on:click="setTool('zoomout')"> Zoom Out </li>
-          <li v-on:click="setTool('zoom')"> Zoom </li>
-          <li v-on:click="setTool('pan')"> Pan </li>
-          <li v-on:click="setTool('grid')"> Grid </li>
-          <li v-on:click="setTool('board-view')"> Board </li>
-          <li v-on:click="setTool('component-view')"> Component </li>
+          <li v-on:click="setTool('zoomin')"> 放大 </li>
+          <li v-on:click="setTool('zoomout')"> 缩小 </li>
+          <li v-on:click="setTool('zoom')"> 复原 </li>
+          <li v-on:click="setTool('pan')"> 拖动 </li>
+          <li v-on:click="setTool('grid')"> 显示网格 </li>
+          <li v-on:click="setTool('board-view')"> 面板视图 </li>
+          <li v-on:click="setTool('component-view')"> 组件视图 </li>
         </ul>
       </li>
       <li v-if="view == 'board'" v-on:click="toggleMenu('components')">
-        <span>Components</span>
+        <span>组件管理</span>
         <ul v-show="topmenu == 'components'">
           <li v-for="component in components" v-on:click="setComponent(component)"> component </li>
         </ul>
       </li>
       <li v-if="view == 'component'" v-on:click="toggleMenu('layers')">
-        <span>Layers</span>
+        <span>层管理</span>
         <ul v-show="topmenu == 'layers'">
           <li v-for="layer in currentComponent.layers" v-on:click="setLayer(layer)"> layer {{(layer.active)? '(active)' : ''}} </li>
         </ul>
       </li>
     </ul>
   </div>
+  
+  <input type="file" name="fileField" id="fileField" class="hide">
 
   <script src="build.js"></script>
 </body>

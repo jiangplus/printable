@@ -582,7 +582,15 @@ var app = window.app = new Vue({
         downloadFile('dump.svg', content)
         return
       } else if (tool == 'dumpJSON') {
-        var content = JSON.stringify(this.shapes)
+        var components_data = JSON.parse(JSON.stringify(this.components))
+        var shapes_data = JSON.parse(JSON.stringify(this.shapes))
+        shapes_data.forEach(x => {
+          if (x.type == 'group-shape' && x.component) {
+            x.componentId = x.component.id
+            x.component = null
+          }
+        })
+        var content = JSON.stringify({ shapes: shapes_data, components: components_data})
         downloadFile('dump.json', content)
         return
       } else if (tool == 'dumpPNG') {
@@ -627,8 +635,20 @@ var app = window.app = new Vue({
                 var fileReader = new FileReader();
                 fileReader.onload = function(evt){
                     console.log(this.result)
-                    self.shapes = JSON.parse(this.result)
-                    self.obj = {}
+                    var content = JSON.parse(this.result)
+                    self.components = content.components
+                    console.log('self.components', content)
+                    console.log('self.components', content.components)
+                    content.shapes.forEach(x => {
+                      if (x.type == 'group-shape' && x.componentId) {
+                        x.component = content.components.find(c => { return c.id == x.componentId })
+                      }
+                    })
+                    self.shapes = content.shapes
+
+                    // self.shapes = JSON.parse(this.result)
+                    self.obj = null
+                    self.currentComponent = (self.components.length > 0)? self.components[0] : null
                 }
                 fileReader.readAsText(file);
             }
