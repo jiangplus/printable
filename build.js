@@ -138,7 +138,7 @@ var app = window.app = new Vue({
   debug: true,
   data: {
     name: 'delight',
-    tool: 'line',
+    tool: 'select',
     view: 'component',
     obj: null,
     currentComponent: null,
@@ -704,12 +704,23 @@ var app = window.app = new Vue({
         app.viewBoxX = 0;
         app.viewBoxY = 0;
       } else if (tool == 'delete') {
-        app.shapes.forEach(function (x) {
-          if (x.selected) {
-            x.selected = false;x.removed = true;
-          }
-        });
+        if (app.view == 'board') {
+          app.shapes.forEach(function (x) {
+            if (x.selected) {
+              x.selected = false;x.removed = true;
+            }
+          });
+        } else if (app.view == 'component') {
+          app.currentComponent.layers.forEach(function (layer) {
+            layer.shapes.forEach(function (x) {
+              if (x.selected) {
+                x.selected = false;x.removed = true;
+              }
+            });
+          });
+        }
         app.obj = null;
+        return;
       } else if (tool == 'grid') {
         app.showGrid = !app.showGrid;
         return;
