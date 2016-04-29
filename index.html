@@ -111,8 +111,8 @@
   </svg>
 
 
-  <div class="menu-nav" v-bind:style="toolStyleOffset">
-    <ul class="parent-menu">
+  <div class="menu-nav"  data-name="menu" :style="{left: menuOffsetX + 'px', top: menuOffsetY + 'px'}">
+    <ul class="parent-menu"  data-name="menu">
       <li v-on:click="toggleMenu('file')">
         <span>文件</span>
         <ul v-show="topmenu == 'file'">
@@ -167,18 +167,36 @@
       <li v-if="view == 'board'" v-on:click="toggleMenu('components')">
         <span>组件管理</span>
         <ul v-show="topmenu == 'components'">
-          <li v-for="component in components" v-on:click="setComponent(component)"> component </li>
+          <li v-on:click="newComponent()"> new component </li>
+          <li v-on:click="deleteComponent()"> delete component </li>
+          <li v-for="component in components" v-on:click="setComponent(component)"> {{component.name}} </li>
         </ul>
       </li>
       <li v-if="view == 'component'" v-on:click="toggleMenu('layers')">
         <span>层管理</span>
         <ul v-show="topmenu == 'layers'">
-          <li v-for="layer in currentComponent.layers" v-on:click="setLayer(layer)"> layer {{(layer.active)? '(active)' : ''}} </li>
+          <li v-on:click="newLayer()"> new layer </li>
+          <li v-on:click="deleteLayer()"> delete layer </li>
+          <li v-for="layer in currentComponent.layers" v-on:click="setLayer(layer)"> {{layer.name}} {{(layer.active)? '(active)' : ''}} </li>
         </ul>
       </li>
     </ul>
   </div>
   
+  <div class="view-switch">
+    <div @click="setTool('board-view')" :class="{active: (view == 'board')}">面板</div> |
+    <div @click="setTool('component-view')" :class="{active: (view == 'component')}">组件</div>
+  </div>
+
+<div class="stack" data-name="stack" :style="{right: stackOffsetX + 'px', top: stackOffsetY + 'px'}">
+  <ul v-if="view == 'component'">
+    <li v-for="layer in currentComponent.layers"><span v-on:click="setLayer(layer)">{{layer.name}} {{(layer.active)? '(active)' : ''}}</span> <div v-on:click="toggleLayer(layer)">show</div><div v-on:click="deleteLayer(layer)">delete</div></li>
+  </ul>
+  <ul v-if="view == 'board'">
+    <li v-for="component in components"><span v-on:click="setComponent(component)">{{component.name}} {{(currentComponent && currentComponent.id == component.id)? '(active)' : ''}}</span> <div v-on:click="deleteComponent(component)">delete</div></li>
+  </ul>
+</div>
+
   <input type="file" name="fileField" id="fileField" class="hide">
 
   <script src="build.js"></script>

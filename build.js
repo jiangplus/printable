@@ -1,6 +1,8 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var Vue = require('vue');
 var Bacon = require('baconjs');
 var _ = require('lodash');
@@ -139,7 +141,7 @@ var app = window.app = new Vue({
   data: {
     name: 'delight',
     tool: 'select',
-    view: 'component',
+    view: 'board',
     obj: null,
     currentComponent: null,
 
@@ -176,6 +178,17 @@ var app = window.app = new Vue({
     measurex2: 0,
     measurey2: 0,
 
+    nameCount: 10,
+
+    stackDragging: false,
+    stackDraggingOffsetX: 0,
+    stackDraggingOffsetY: 0,
+    stackOffsetX: 40,
+    stackOffsetY: 20,
+
+    menuOffsetX: 100,
+    menuOffsetY: 20,
+
     components: [{
       name: 'component-1',
       id: createId(),
@@ -198,7 +211,6 @@ var app = window.app = new Vue({
       // { type: 'line-shape', id: createId(), x1: 200, y1: 300, x2: 440, y2: 300, selected: false, removed: false, },
       // { type: 'rect-shape', id: createId(), radius: 30, x: 400, y: 100, width: 140, height: 160, selected: false, removed: false, },
       // { type: 'circle-shape', id: createId(), x: 420, y: 130, width: 100, height: 100, selected: false, removed: false, },
-
     ]
   },
   computed: {
@@ -229,6 +241,50 @@ var app = window.app = new Vue({
     this.currentComponent = comp;
 
     window.b = Bacon;
+
+    var onpanelup = Bacon.fromEvent(document.querySelector('body'), "mouseup");
+    var onpaneldown = Bacon.fromEvent(document.querySelector('body'), "mousedown");
+    var onpanelmove = Bacon.fromEvent(document.querySelector('body'), "mousemove");
+
+    // var target_id = ev.target && ev.target.attributes['data-id'] && ev.target.attributes['data-id'].value;
+
+    onpaneldown.onValue(function (ev) {
+      _this.stackDragging = true;
+      _this.stackDraggingOffsetX = ev.screenX;
+      _this.stackDraggingOffsetY = ev.screenY;
+    });
+
+    onpanelup.onValue(function (ev) {
+      _this.stackDragging = false;
+      _this.stackDraggingOffsetX = 0;
+      _this.stackDraggingOffsetY = 0;
+    });
+
+    onpanelmove.onValue(function (ev) {
+      var target_name = ev.target && ev.target.attributes['data-name'] && ev.target.attributes['data-name'].value;
+      console.log(target_name);
+      if (_this.stackDragging && target_name == 'stack') {
+        var deltaX = ev.screenX - _this.stackDraggingOffsetX;
+        var deltaY = ev.screenY - _this.stackDraggingOffsetY;
+        _this.stackDraggingOffsetX = ev.screenX;
+        _this.stackDraggingOffsetY = ev.screenY;
+        console.log('stackDragging', ev.screenX, ev.screenY, deltaX, deltaY);
+        _this.stackOffsetX -= deltaX;
+        _this.stackOffsetY += deltaY;
+      }
+
+      // if ( this.stackDragging && target_name == 'menu') {
+      //   var deltaX = ev.screenX - this.stackDraggingOffsetX
+      //   var deltaY = ev.screenY - this.stackDraggingOffsetY
+      //   this.stackDraggingOffsetX = ev.screenX
+      //   this.stackDraggingOffsetY = ev.screenY
+      //   console.log('stackDragging',ev.screenX, ev.screenY, deltaX,deltaY)
+      //   this.menuOffsetX += deltaX
+      //   this.menuOffsetY += deltaY
+      // }
+    });
+
+    // && target_name == 'stack'
 
     var onup = Bacon.fromEvent(document.querySelector('#canvas'), "mouseup");
     var ondown = Bacon.fromEvent(document.querySelector('#canvas'), "mousedown");
@@ -268,16 +324,31 @@ var app = window.app = new Vue({
       return app.tool == 'select' && app.view == 'board' && app.dragging && app.obj;
     }).onValue(function (ev) {
       console.log('board moving');
-      app.obj.x += app.deltaX;
-      app.obj.y += app.deltaY;
+      if (app.obj.type == 'line-shape') {
+        app.obj.x1 += app.deltaX;
+        app.obj.y1 += app.deltaY;
+        app.obj.x2 += app.deltaX;
+        app.obj.y2 += app.deltaY;
+      } else {
+        app.obj.x += app.deltaX;
+        app.obj.y += app.deltaY;
+      }
     });
 
     onmove.filter(function (x) {
       return app.tool == 'select' && app.view == 'component' && app.dragging && app.obj;
     }).onValue(function (ev) {
       console.log('component moving');
-      app.obj.x += app.deltaX;
-      app.obj.y += app.deltaY;
+      console.log(app.obj);
+      if (app.obj.type == 'line-shape') {
+        app.obj.x1 += app.deltaX;
+        app.obj.y1 += app.deltaY;
+        app.obj.x2 += app.deltaX;
+        app.obj.y2 += app.deltaY;
+      } else {
+        app.obj.x += app.deltaX;
+        app.obj.y += app.deltaY;
+      }
     });
 
     ondown.filter(function (x) {
@@ -486,6 +557,8 @@ var app = window.app = new Vue({
         app.offsetX = roundGrid(app.offsetX);
         app.offsetY = roundGrid(app.offsetY);
       }
+
+      console.log('??');
 
       var shape = app.obj;
       var x2 = app.offsetX;
@@ -705,17 +778,15 @@ var app = window.app = new Vue({
         app.viewBoxY = 0;
       } else if (tool == 'delete') {
         if (app.view == 'board') {
-          app.shapes.forEach(function (x) {
-            if (x.selected) {
-              x.selected = false;x.removed = true;
-            }
+          // app.shapes.forEach(x => { if (x.selected) { x.selected = false; x.removed = true; } })
+          app.shapes = app.shapes.filter(function (x) {
+            return !x.selected;
           });
         } else if (app.view == 'component') {
           app.currentComponent.layers.forEach(function (layer) {
-            layer.shapes.forEach(function (x) {
-              if (x.selected) {
-                x.selected = false;x.removed = true;
-              }
+            // layer.shapes.forEach(x => { if (x.selected) { x.selected = false; x.removed = true; } })
+            layer.shapes = layer.shapes.filter(function (x) {
+              return !x.selected;
             });
           });
         }
@@ -780,18 +851,89 @@ var app = window.app = new Vue({
       this.obj = null;
       this.view = 'board';
     },
+    toggleLayer: function toggleLayer(layer) {
+      layer.visible = !layer.visible;
+    },
     setLayer: function setLayer(layer) {
       this.currentComponent.layers.forEach(function (l) {
         l.active = false;
       });
       layer.active = true;
     },
+    deleteLayer: function deleteLayer(layer) {
+      var layers = this.currentComponent.layers;
+      var index = layers.findIndex(function (l) {
+        return l.id == layer.id;
+      });
+      this.currentComponent.layers = [].concat(_toConsumableArray(layers.slice(0, index)), _toConsumableArray(layers.slice(index + 1)));
+      if (layer.active && this.currentComponent.layers.length > 0) {
+        this.currentComponent.layers[0].active = true;
+      }
+    },
     newLayer: function newLayer() {
       this.currentComponent.layers.forEach(function (l) {
         l.active = false;
       });
-      var layer = this.currentComponent.layers.push(layer);
+      this.nameCount += 1;
+      var layer = {
+        name: 'layer-' + this.nameCount,
+        id: createId(),
+        visible: true,
+        active: true,
+        shapes: []
+      };
+      this.currentComponent.layers.push(layer);
       layer.active = true;
+    },
+    setComponent: function setComponent(comp) {
+      this.currentComponent = comp;
+    },
+    deleteComponent: function deleteComponent(comp) {
+      var comp = this.currentComponent;
+      var index = this.components.findIndex(function (x) {
+        return x.id == comp.id;
+      });
+      this.components = [].concat(_toConsumableArray(this.components.slice(0, index)), _toConsumableArray(this.components.slice(index + 1)));
+      if (this.components.length > 0) {
+        this.currentComponent = this.components[0];
+      }
+    },
+    newComponent: function newComponent() {
+      this.nameCount += 1;
+
+      var comp = {
+        name: 'component-' + this.nameCount,
+        id: createId(),
+        layers: [{
+          name: 'layer-1',
+          id: createId(),
+          visible: true,
+          active: true,
+          shapes: []
+        }]
+      };
+
+      this.components.push(comp);
+      this.currentComponent = comp;
+    },
+    stackMouseDown: function stackMouseDown(ev) {
+      this.stackDragging = true;this.stackDraggingOffsetX = ev.offsetX;this.stackDraggingOffsetY = ev.offsetY;
+    },
+    stackMouseUp: function stackMouseUp() {
+      this.stackDragging = false;this.stackDraggingOffsetX = 0;this.stackDraggingOffsetY = 0;
+    },
+    stackMouseMove: function stackMouseMove(ev) {
+      ev.stopPropagation();
+      console.log(ev.target.tagName);
+      if (this.stackDragging && ev.target.tagName == 'DIV') {
+        var deltaX = ev.offsetX - this.stackDraggingOffsetX;
+        var deltaY = ev.offsetY - this.stackDraggingOffsetY;
+        this.stackDraggingOffsetX = ev.offsetX;
+        this.stackDraggingOffsetY = ev.offsetY;
+        console.log('stackDragging', ev.offsetX, ev.offsetY, deltaX, deltaY);
+        this.stackOffsetX -= deltaX;
+        this.stackOffsetY += deltaY;
+      }
     }
   }
 });

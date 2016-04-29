@@ -29,6 +29,8 @@ ul {
 .menu-nav ul.parent-menu > li > ul, .menu-nav ul.parent-menu > li > .form {
   /*display: none;*/
   /*display: block;*/ }
+.menu-nav ul {
+  margin-bottom: 0; }
 .menu-nav ul.parent-menu > li > ul {
   display: block; }
 .menu-nav ul.parent-menu > li {
@@ -296,5 +298,44 @@ ul {
   border: none;
   border-bottom: 1px solid rgba(220, 220, 220, 0.92);
   text-align: right; }
+
+.view-switch {
+  background: #f7f7f7;
+  z-index: 14;
+  position: absolute;
+  right: 340px;
+  top: 20px;
+  width: 140px; }
+  .view-switch div {
+    display: inline-block;
+    margin-right: 10px;
+    margin-left: 10px; }
+  .view-switch div.active {
+    color: red; }
+
+.stack {
+  background: #f7f7f7;
+  z-index: 12;
+  position: absolute;
+  right: 40px;
+  top: 20px;
+  width: 200px;
+  /*height: 20px;*/ }
+  .stack ul {
+    padding-right: 10px;
+    padding-left: 10px; }
+  .stack ul li {
+    margin-bottom: 0; }
+  .stack ul li div {
+    display: block;
+    float: right;
+    margin-left: 5px;
+    font-size: 10px;
+    line-height: 20px;
+    color: indigo; }
+  .stack ul li span {
+    width: 60px;
+    text-overflow: wrap;
+    word-break: break-all; }
 
 /*# sourceMappingURL=app.css.map */

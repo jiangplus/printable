@@ -139,7 +139,7 @@ var app = window.app = new Vue({
   data: {
     name: 'delight',
     tool: 'select',
-    view: 'component',
+    view: 'board',
     obj: null,
     currentComponent: null,
 
@@ -176,8 +176,19 @@ var app = window.app = new Vue({
     measurex2: 0,
     measurey2: 0,
 
+    nameCount: 10,
+
+    stackDragging: false,
+    stackDraggingOffsetX: 0,
+    stackDraggingOffsetY: 0,
+    stackOffsetX: 40,
+    stackOffsetY: 20,
+
+    menuOffsetX: 100,
+    menuOffsetY: 20,
+
     components: [
-        { 
+        {
         	name: 'component-1', 
         	id: createId(),
         	layers: [
@@ -209,7 +220,6 @@ var app = window.app = new Vue({
       // { type: 'line-shape', id: createId(), x1: 200, y1: 300, x2: 440, y2: 300, selected: false, removed: false, },
       // { type: 'rect-shape', id: createId(), radius: 30, x: 400, y: 100, width: 140, height: 160, selected: false, removed: false, },
       // { type: 'circle-shape', id: createId(), x: 420, y: 130, width: 100, height: 100, selected: false, removed: false, },
-
     ]
   },
   computed: {
@@ -238,6 +248,53 @@ var app = window.app = new Vue({
     this.currentComponent = comp
 
     window.b = Bacon;
+
+    var onpanelup = Bacon.fromEvent(document.querySelector('body'), "mouseup")
+    var onpaneldown = Bacon.fromEvent(document.querySelector('body'), "mousedown")
+    var onpanelmove = Bacon.fromEvent(document.querySelector('body'), "mousemove")
+
+    // var target_id = ev.target && ev.target.attributes['data-id'] && ev.target.attributes['data-id'].value;
+
+    onpaneldown.onValue((ev) => {
+      this.stackDragging = true; 
+      this.stackDraggingOffsetX = ev.screenX; 
+      this.stackDraggingOffsetY = ev.screenY;
+    })
+
+    onpanelup.onValue((ev) => {
+      this.stackDragging = false
+      this.stackDraggingOffsetX = 0; 
+      this.stackDraggingOffsetY = 0; 
+    })
+
+    onpanelmove.onValue((ev) => {
+      var target_name = ev.target && ev.target.attributes['data-name'] && ev.target.attributes['data-name'].value;
+      console.log(target_name)
+      if ( this.stackDragging && target_name == 'stack') {
+        var deltaX = ev.screenX - this.stackDraggingOffsetX
+        var deltaY = ev.screenY - this.stackDraggingOffsetY
+        this.stackDraggingOffsetX = ev.screenX
+        this.stackDraggingOffsetY = ev.screenY
+        console.log('stackDragging',ev.screenX, ev.screenY, deltaX,deltaY)
+        this.stackOffsetX -= deltaX
+        this.stackOffsetY += deltaY
+      }
+
+      // if ( this.stackDragging && target_name == 'menu') {
+      //   var deltaX = ev.screenX - this.stackDraggingOffsetX
+      //   var deltaY = ev.screenY - this.stackDraggingOffsetY
+      //   this.stackDraggingOffsetX = ev.screenX
+      //   this.stackDraggingOffsetY = ev.screenY
+      //   console.log('stackDragging',ev.screenX, ev.screenY, deltaX,deltaY)
+      //   this.menuOffsetX += deltaX
+      //   this.menuOffsetY += deltaY
+      // }
+
+    })
+
+ // && target_name == 'stack'
+
+
 
     var onup = Bacon.fromEvent(document.querySelector('#canvas'), "mouseup")
     var ondown = Bacon.fromEvent(document.querySelector('#canvas'), "mousedown")
@@ -276,14 +333,29 @@ var app = window.app = new Vue({
 
     onmove.filter(x => { return app.tool == 'select' && app.view == 'board' && app.dragging && app.obj }).onValue((ev) => {
     	console.log('board moving')
-    	app.obj.x += app.deltaX
-    	app.obj.y += app.deltaY
+      if (app.obj.type == 'line-shape') {
+        app.obj.x1 += app.deltaX
+        app.obj.y1 += app.deltaY
+        app.obj.x2 += app.deltaX
+        app.obj.y2 += app.deltaY
+      } else {
+        app.obj.x += app.deltaX
+        app.obj.y += app.deltaY
+      }
     })
 
     onmove.filter(x => { return app.tool == 'select' && app.view == 'component' && app.dragging && app.obj }).onValue((ev) => {
     	console.log('component moving')
-    	app.obj.x += app.deltaX
-    	app.obj.y += app.deltaY
+      console.log(app.obj)
+      if (app.obj.type == 'line-shape') {
+        app.obj.x1 += app.deltaX
+        app.obj.y1 += app.deltaY
+        app.obj.x2 += app.deltaX
+        app.obj.y2 += app.deltaY
+      } else {
+        app.obj.x += app.deltaX
+        app.obj.y += app.deltaY
+      }
     })
 
     
@@ -460,11 +532,13 @@ var app = window.app = new Vue({
         app.offsetY = roundGrid(app.offsetY)
       }
 
+      console.log('??')
+
       var shape = app.obj
-          var x2 = app.offsetX
-          var y2 = app.offsetY
-          var rate0 = (y2-shape.y1)/(x2-shape.x1)
-          var rate = Math.abs(rate0)
+      var x2 = app.offsetX
+      var y2 = app.offsetY
+      var rate0 = (y2-shape.y1)/(x2-shape.x1)
+      var rate = Math.abs(rate0)
 
       if (app.normalize) {
         if (rate <= 0.5) {
@@ -665,10 +739,12 @@ var app = window.app = new Vue({
           app.viewBoxY = 0
       } else if (tool == 'delete') {
           if (app.view == 'board') {
-            app.shapes.forEach(x => { if (x.selected) { x.selected = false; x.removed = true; } })
+            // app.shapes.forEach(x => { if (x.selected) { x.selected = false; x.removed = true; } })
+            app.shapes = app.shapes.filter(x => { return !x.selected })
           } else if (app.view == 'component') {
             app.currentComponent.layers.forEach(layer => {
-              layer.shapes.forEach(x => { if (x.selected) { x.selected = false; x.removed = true; } })
+              // layer.shapes.forEach(x => { if (x.selected) { x.selected = false; x.removed = true; } })
+              layer.shapes = layer.shapes.filter(x => { return !x.selected })
             })
           }
           app.obj = null
@@ -730,15 +806,79 @@ var app = window.app = new Vue({
     	this.obj = null
     	this.view = 'board'
     },
+    toggleLayer: function(layer) {
+      layer.visible = !layer.visible
+    },
     setLayer: function(layer) {
       this.currentComponent.layers.forEach(l => { l.active = false })
       layer.active = true
     },
+    deleteLayer: function(layer) {
+      var layers = this.currentComponent.layers
+      var index = layers.findIndex(l => { return l.id == layer.id })
+      this.currentComponent.layers = [...layers.slice(0,index), ...layers.slice(index+1)]
+      if (layer.active && this.currentComponent.layers.length > 0) {
+        this.currentComponent.layers[0].active = true
+      }
+    },
     newLayer: function() {
       this.currentComponent.layers.forEach(l => { l.active = false })
-      var layer = 
+      this.nameCount += 1
+      var layer = { 
+        name: 'layer-' + this.nameCount, 
+        id: createId(), 
+        visible: true,
+        active: true,
+        shapes: []
+      }
       this.currentComponent.layers.push(layer)
       layer.active = true
+    },
+    setComponent: function(comp) {
+      this.currentComponent = comp
+    },
+    deleteComponent: function(comp) {
+      var comp = this.currentComponent
+      var index = this.components.findIndex(x => { return x.id == comp.id })
+      this.components = [...this.components.slice(0,index), ...this.components.slice(index+1)]
+      if (this.components.length > 0) {
+        this.currentComponent = this.components[0]
+      }
+    },
+    newComponent: function() {
+      this.nameCount += 1
+
+      var comp = {
+          name: 'component-' + this.nameCount, 
+          id: createId(),
+          layers: [
+            { 
+              name: 'layer-1', 
+              id: createId(), 
+              visible: true,
+              active: true,
+              shapes: []
+            },
+          ],
+        }
+
+      this.components.push(comp)
+      this.currentComponent = comp
+    },
+    stackMouseDown: function(ev) { this.stackDragging = true; this.stackDraggingOffsetX = ev.offsetX; this.stackDraggingOffsetY = ev.offsetY },
+    stackMouseUp: function() { this.stackDragging = false; this.stackDraggingOffsetX = 0; this.stackDraggingOffsetY = 0},
+    stackMouseMove: function(ev) { 
+      ev.stopPropagation()
+      console.log(ev.target.tagName)
+      if ( this.stackDragging && ev.target.tagName == 'DIV') {
+        var deltaX = ev.offsetX - this.stackDraggingOffsetX
+        var deltaY = ev.offsetY - this.stackDraggingOffsetY
+        this.stackDraggingOffsetX = ev.offsetX
+        this.stackDraggingOffsetY = ev.offsetY
+        console.log('stackDragging',ev.offsetX, ev.offsetY, deltaX,deltaY)
+        this.stackOffsetX -= deltaX
+        this.stackOffsetY += deltaY
+      } 
     },
   }
 })
